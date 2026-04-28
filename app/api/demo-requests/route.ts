@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const demandes = await query<any[]>(
-      `SELECT * FROM DemoRequest ORDER BY createdAt DESC LIMIT ${limit} OFFSET ${offset}`
+      `SELECT * FROM demandes_demo ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
     );
     
-    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM DemoRequest');
+    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM demandes_demo');
 
     return NextResponse.json({
       data: demandes,
@@ -37,29 +37,31 @@ export async function POST(request: NextRequest) {
 
     if (!etablissement_name || !contact_name || !email || !phone) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Champs obligatoires manquants' },
         { status: 400 }
       );
     }
 
-    const id = crypto.randomUUID();
     await query(
-      'INSERT INTO DemoRequest (id, etablissementName, contactName, email, phone, message, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-      [id, etablissement_name, contact_name, email, phone, message]
+      'INSERT INTO demandes_demo (etablissement_name, contact_name, email, phone, message, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
+      [etablissement_name, contact_name, email, phone, message]
     );
 
-    // Envoyer la notification par email
-    await sendDemoNotification({ etablissement_name, contact_name, email, phone, message });
+    // Envoyer la notification par email (si configuré)
+    try {
+      await sendDemoNotification({ etablissement_name, contact_name, email, phone, message });
+    } catch (e) {
+      console.warn("Mail notification failed but DB save succeeded");
+    }
 
     return NextResponse.json({ 
-      message: 'Demo request submitted successfully',
-      id
+      message: 'Demande soumise avec succès !'
     }, { status: 201 });
 
   } catch (error) {
     console.error('Error creating demo request:', error);
     return NextResponse.json(
-      { error: 'Failed to submit demo request' },
+      { error: 'Échec de la soumission' },
       { status: 500 }
     );
   }
