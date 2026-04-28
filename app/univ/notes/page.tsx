@@ -37,11 +37,27 @@ export default function GradeEntry() {
     setStudents(prev => prev.map(s => s.id === id ? { ...s, grade: value } : s))
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true)
+    
+    // Simulate push notification trigger
+    try {
+      await fetch('/api/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: "Nouvelle Note Disponible 🎓",
+          body: `Matière: Programmation C. Moyenne de classe: 13.5/20. Consultez votre relevé sur EduSmart !`,
+          url: "/univ/dashboard"
+        })
+      })
+    } catch (e) {
+      console.error(e)
+    }
+
     setTimeout(() => {
       setIsSaving(false)
-      alert("Notes enregistrées et crédits calculés !")
+      alert("Notes enregistrées et notifications Push envoyées aux étudiants ! 🚀")
     }, 1500)
   }
 
