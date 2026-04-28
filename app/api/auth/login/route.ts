@@ -5,22 +5,11 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    // Debug temporaire pour voir les colonnes
-    const cols: any = await query('DESCRIBE users');
-    
-    // Tentative avec le nom probable 'mot_de_passe' ou similar
-    const passwordField = cols.find((c: any) => 
-      c.Field.toLowerCase().includes('pass') || 
-      c.Field.toLowerCase().includes('mot')
-    ).Field;
-    
-    const users = await query<any[]>(`SELECT * FROM users WHERE email = ? AND ${passwordField} = ?`, [email, password]);
+    // Utilisation de la table 'users' et de la colonne 'password_hash' identifiée
+    const users = await query<any[]>('SELECT * FROM users WHERE email = ? AND password_hash = ?', [email, password]);
 
     if (users.length === 0) {
-      const cols: any = await query('DESCRIBE users');
-      return NextResponse.json({ 
-        error: `Table vide. Colonnes : ${cols.map((c: any) => c.Field).join(', ')}` 
-      }, { status: 401 });
+      return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
     }
 
     const user = users[0];
