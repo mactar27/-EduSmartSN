@@ -15,38 +15,21 @@ export async function GET(request: NextRequest) {
       targetTenantId = tenants[0].id;
     }
 
-    let students = await query<any[]>(
-      'SELECT * FROM etudiants',
+    const students = await query<any[]>(
+      'SELECT id, name, student_id as studentId, department, statut FROM etudiants ORDER BY id DESC',
       []
     );
 
-    if (students.length === 0) {
-      console.log("Table is empty, inserting test student...");
-      await query(
-        `INSERT INTO etudiants (name, email, student_id, department, etablissement_id, statut, created_at, updated_at) 
-         VALUES ('TEST PERSISTANCE', 'test@edusmart.sn', 'TEST-001', 'Debug', ?, 'actif', NOW(), NOW())`,
-        [targetTenantId || 1]
-      );
-      // Re-fetch
-      students = await query<any[]>('SELECT * FROM etudiants', []);
-    }
-
-    // Debug: Compter le nombre total d'élèves dans la base pour voir s'ils existent
-    const totalInDb = await query<any[]>('SELECT COUNT(*) as count FROM etudiants');
-
     return NextResponse.json({ 
       data: students,
-      debug: { 
-        targetTenantId,
-        totalInDb: totalInDb[0]?.count,
-        countForThisTenant: students.length
-      }
+      count: students.length
     });
   } catch (error: any) {
+    console.error('API Error:', error);
     return NextResponse.json({ 
-      error: 'SQL Error', 
+      error: 'SQL_ERROR', 
       message: error.message,
-      code: error.code
+      sqlMessage: error.sqlMessage // Spécifique à mysql2
     }, { status: 500 });
   }
 }
