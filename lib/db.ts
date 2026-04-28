@@ -16,13 +16,8 @@ const poolConfig = process.env.DATABASE_URL
 
 export const db = globalForMysql.mysql ?? (() => {
   if (process.env.DATABASE_URL) {
-    const url = new URL(process.env.DATABASE_URL);
     return mysql.createPool({
-      host: url.hostname,
-      port: parseInt(url.port) || 3306,
-      user: url.username,
-      password: url.password,
-      database: url.pathname.substring(1),
+      uri: process.env.DATABASE_URL,
       ssl: {
         rejectUnauthorized: false
       },

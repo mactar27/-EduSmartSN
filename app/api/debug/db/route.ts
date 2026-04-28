@@ -8,18 +8,18 @@ export async function GET() {
     const url = process.env.DATABASE_URL;
     if (!url) return NextResponse.json({ error: "DATABASE_URL manquante" });
 
-    const connection = await mysql.createConnection({
+    const pool = mysql.createPool({
       uri: url,
       ssl: { rejectUnauthorized: false }
     });
     
-    await connection.ping();
-    await connection.end();
+    const [rows] = await pool.query('SELECT 1 as test');
+    await pool.end();
 
-    return NextResponse.json({ status: "Connecté avec succès à TiDB Cloud !" });
+    return NextResponse.json({ status: "Pool connecté avec succès !", data: rows });
   } catch (error: any) {
     return NextResponse.json({ 
-      status: "Échec de connexion", 
+      status: "Échec du Pool", 
       error: error.message,
       code: error.code,
       stack: error.stack
