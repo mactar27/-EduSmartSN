@@ -19,8 +19,7 @@ export async function POST(request: NextRequest) {
     if (users.length === 0) {
       const count: any = await query('SELECT COUNT(*) as total FROM users');
       return NextResponse.json({ 
-        error: 'Identifiants incorrects', 
-        debug: `Nombre d'utilisateurs en base : ${count[0].total}` 
+        error: `Identifiants incorrects (Users en base : ${count[0].total})` 
       }, { status: 401 });
     }
 
