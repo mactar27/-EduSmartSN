@@ -7,25 +7,11 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'EduSmart SN - Smarter Education, Better Future',
-  description: 'Plateforme SaaS de gestion universitaire pour le Sénégal. Gérez vos établissements, étudiants, paiements et cours en toute simplicité.',
-  generator: 'v0.app',
+  title: 'EduSmart SN | Souveraineté Numérique pour l\'Éducation au Sénégal',
+  description: 'Plateforme SaaS de gestion universitaire souveraine. Gérez vos établissements, étudiants, paiements et cursus académiques.',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 }
 
