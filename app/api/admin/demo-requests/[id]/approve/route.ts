@@ -24,8 +24,8 @@ export async function POST(
     const subdomain = demo.etablissement_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     
     await query(
-      `INSERT INTO etablissements (name, slug, city, is_active, created_at, updated_at) 
-       VALUES (?, ?, ?, 1, NOW(), NOW())`,
+      `INSERT INTO etablissements (name, slug, city, is_active, primary_color, secondary_color, created_at, updated_at) 
+       VALUES (?, ?, ?, 1, "#4f46e5", "#6366f1", NOW(), NOW())`,
       [demo.etablissement_name, subdomain, 'Dakar']
     );
 
