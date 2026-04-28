@@ -16,15 +16,7 @@ const poolConfig = process.env.DATABASE_URL
 
 export const db = globalForMysql.mysql ?? (
   process.env.DATABASE_URL 
-    ? mysql.createPool({
-        uri: process.env.DATABASE_URL,
-        ssl: {
-          rejectUnauthorized: false // Indispensable pour TiDB Cloud sur Vercel
-        },
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-      })
+    ? mysql.createPool(`${process.env.DATABASE_URL}${process.env.DATABASE_URL.includes('?') ? '&' : '?'}ssl={"rejectUnauthorized":false}`)
     : mysql.createPool(poolConfig as any)
 );
 
