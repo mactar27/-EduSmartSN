@@ -14,15 +14,19 @@ export async function GET() {
     });
     
     try {
-      const [studentCols]: any = await pool.query('DESCRIBE etudiants');
-      const [paymentCols]: any = await pool.query('DESCRIBE paiements');
+      const [tenants]: any = await pool.query('SELECT id FROM etablissements LIMIT 1');
+      const results: any = { status: "Test Stats", tenants };
+
+      if (tenants.length > 0) {
+        const id = tenants[0].id;
+        const [students]: any = await pool.query('SELECT COUNT(*) as count FROM etudiants WHERE etablissement_id = ?', [id]);
+        const [payments]: any = await pool.query('SELECT SUM(montant) as total FROM paiements WHERE etablissement_id = ?', [id]);
+        results.students = students;
+        results.payments = payments;
+      }
+
       await pool.end();
-      
-      return NextResponse.json({ 
-        status: "Structure tables", 
-        etudiants: studentCols.map((c: any) => c.Field || c.Champ || Object.values(c)[0]),
-        paiements: paymentCols.map((c: any) => c.Field || c.Champ || Object.values(c)[0])
-      });
+      return NextResponse.json(results);
     } catch (sqlError: any) {
       await pool.end();
       return NextResponse.json({ status: "Erreur", message: sqlError.message }, { status: 500 });
