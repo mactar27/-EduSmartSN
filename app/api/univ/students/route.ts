@@ -3,19 +3,13 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const students = await query<any[]>(
-      'SELECT id, nom, prenom, matricule as studentId, filiere as department, statut FROM etudiants ORDER BY id DESC',
-      []
-    );
-
-    const formattedStudents = students.map(s => ({
-      ...s,
-      name: `${s.prenom} ${s.nom}`.trim()
-    }));
-
+    // Diagnostic complet des colonnes
+    const columns = await query<any[]>('DESCRIBE etudiants');
+    const allFields = columns.map(c => c.Field);
+    
     return NextResponse.json({ 
-      data: formattedStudents,
-      count: formattedStudents.length
+      error: 'FULL_DIAGNOSTIC',
+      fields: allFields 
     });
   } catch (error: any) {
     return NextResponse.json({ 
