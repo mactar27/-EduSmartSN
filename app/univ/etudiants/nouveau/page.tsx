@@ -108,7 +108,7 @@ export default function NewStudentPage() {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-2xl shadow-lg shadow-emerald-200 gap-2 mt-4"
+          className="w-full h-14 bg-primary hover:bg-primary/90 text-white text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 gap-2 mt-4"
         >
           <Save size={20} />
           {isLoading ? "Enregistrement..." : "Valider l'inscription"}

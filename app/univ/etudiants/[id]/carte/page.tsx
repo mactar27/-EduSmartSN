@@ -63,7 +63,7 @@ export default function StudentCardPage() {
         {/* Front of Card */}
         <div className="relative w-[500px] h-[315px] bg-[#0f172a] rounded-[24px] overflow-hidden shadow-2xl border border-white/10 text-white print:shadow-none">
           {/* Top Bar */}
-          <div className="absolute top-0 inset-x-0 h-2 bg-emerald-500" />
+          <div className="absolute top-0 inset-x-0 h-2 bg-primary" />
           
           <div className="p-8 h-full flex flex-col justify-between">
             <div className="flex justify-between items-start">
@@ -71,7 +71,7 @@ export default function StudentCardPage() {
                 <Image src="/logo.png" alt="Logo" width={100} height={35} className="h-8 w-auto brightness-0 invert" />
               </div>
               <div className="text-right">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">Carte Élève Officielle</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Carte Élève Officielle</p>
                 <p className="text-[10px] text-white/50">Année 2024 - 2025</p>
               </div>
             </div>
@@ -87,7 +87,7 @@ export default function StudentCardPage() {
               </div>
               <div className="flex-1 space-y-1">
                 <h3 className="text-2xl font-black tracking-tight">{student.name}</h3>
-                <p className="text-emerald-400 font-bold tracking-widest text-sm uppercase">{student.studentId}</p>
+                <p className="text-primary font-bold tracking-widest text-sm uppercase">{student.studentId}</p>
                 <div className="pt-2">
                    <p className="text-[10px] uppercase text-white/40 font-bold tracking-tighter">Département</p>
                    <p className="text-sm font-semibold">{student.department || "Enseignement Général"}</p>
@@ -111,7 +111,7 @@ export default function StudentCardPage() {
           </div>
 
           {/* Decorative background elements */}
-          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none" />
         </div>
 

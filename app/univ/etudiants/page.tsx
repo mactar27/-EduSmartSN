@@ -110,7 +110,7 @@ export default function StudentListPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Statut</span>
-                    <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg text-[10px] uppercase">Actif</span>
+                    <span className="text-primary font-bold bg-primary/5 px-2 py-0.5 rounded-lg text-[10px] uppercase">Actif</span>
                   </div>
                 </div>
 

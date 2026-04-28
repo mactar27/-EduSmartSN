@@ -48,7 +48,7 @@ function DashboardContent() {
 
   const stats = [
     { label: "Élèves Inscrits", value: data.stats.students.toLocaleString(), icon: Users, bg: "bg-blue-50", color: "text-blue-600" },
-    { label: "Validation Dossiers", value: data.stats.enrollmentRate, icon: CheckCircle2, bg: "bg-emerald-50", color: "text-emerald-600" },
+    { label: "Validation Dossiers", value: data.stats.enrollmentRate, icon: CheckCircle2, bg: "bg-primary/5", color: "text-primary" },
     { label: "Recettes Globales", value: `${data.stats.totalRevenue.toLocaleString()} F`, icon: Wallet, bg: "bg-amber-50", color: "text-amber-600" },
     { label: "Alertes Système", value: "0", icon: AlertCircle, bg: "bg-rose-50", color: "text-rose-600" },
   ];
@@ -70,7 +70,7 @@ function DashboardContent() {
             <QrCode size={20} />
             Scanner Carte
           </Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold h-12 shadow-lg shadow-emerald-200 transition-transform hover:scale-105">
+          <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl font-bold h-12 shadow-lg shadow-primary/20 transition-transform hover:scale-105">
             Nouvelle Inscription
           </Button>
         </div>
@@ -121,13 +121,13 @@ function DashboardContent() {
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <CheckCircle2 className="text-emerald-600" />
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <CheckCircle2 className="text-primary" />
             Activités Pédagogiques
           </h3>
           <div className="space-y-6">
             <div className="flex items-start gap-4 p-4 border border-border/50 rounded-xl hover:border-primary transition-colors">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-primary mt-2 animate-pulse" />
               <div>
                 <p className="font-bold">Inscriptions de l'Année Académique</p>
                 <p className="text-sm text-muted-foreground">En cours de traitement dans votre base de données.</p>

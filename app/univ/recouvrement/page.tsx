@@ -47,10 +47,10 @@ export default function RecoveryDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-6 border-border rounded-[2rem] bg-card hover:shadow-xl transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
               <TrendingUp size={24} />
             </div>
-            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">+12.5%</span>
+            <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full">+12.5%</span>
           </div>
           <p className="text-sm font-medium text-muted-foreground">Total Encaissé (Mai)</p>
           <h3 className="text-3xl font-black mt-1">8 450 000 <span className="text-sm font-bold opacity-50">FCFA</span></h3>
@@ -129,7 +129,7 @@ export default function RecoveryDashboard() {
                   <span className="text-foreground">95%</span>
                </div>
                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 w-[95%]" />
+                  <div className="h-full bg-primary w-[95%]" />
                </div>
 
                <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-muted-foreground pt-2">
@@ -210,7 +210,7 @@ export default function RecoveryDashboard() {
                         <td className="px-8 py-5">
                           <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded">MENSUALITÉ</span>
                         </td>
-                        <td className="px-8 py-5 font-black text-emerald-600">+15 000</td>
+                        <td className="px-8 py-5 font-black text-primary">+15 000</td>
                         <td className="px-8 py-5">
                            <div className="flex items-center gap-2">
                              <div className="w-6 h-6 rounded-full bg-[#00AEEF] flex items-center justify-center p-1">
@@ -244,7 +244,7 @@ export default function RecoveryDashboard() {
                         </td>
                         <td className="px-8 py-5 font-black text-rose-600">30 000 CFA</td>
                         <td className="px-8 py-5 flex gap-2">
-                          <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-emerald-600 border-emerald-100 hover:bg-emerald-50">
+                          <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-primary border-primary/20 hover:bg-primary/5">
                             <Phone size={14} />
                           </Button>
                           <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-blue-600 border-blue-100 hover:bg-blue-50">
