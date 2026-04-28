@@ -8,7 +8,8 @@ import {
   CreditCard, 
   MoreVertical, 
   Printer,
-  ChevronRight
+  ChevronRight,
+  FileSpreadsheet
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,15 +40,21 @@ export default function StudentListPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Gestion des Étudiants</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Gestion des Élèves</h2>
           <p className="text-muted-foreground mt-1">Gérez les dossiers et générez les cartes d'identité biométriques.</p>
         </div>
-        <Link href="/univ/etudiants/nouveau">
-          <Button className="bg-emerald-600 hover:bg-emerald-700 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-emerald-200">
-            <UserPlus size={20} />
-            Inscrire un étudiant
+        <div className="flex gap-3">
+          <Button variant="outline" className="h-12 rounded-xl gap-2 font-bold border-primary text-primary hover:bg-primary/5">
+            <FileSpreadsheet size={20} />
+            Import Excel
           </Button>
-        </Link>
+          <Link href="/univ/etudiants/nouveau">
+            <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
+              <UserPlus size={20} />
+              Inscrire un élève
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-4 items-center">
@@ -69,9 +76,9 @@ export default function StudentListPage() {
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto text-muted-foreground">
               <Users size={40} />
             </div>
-            <p className="text-muted-foreground italic">Aucun étudiant inscrit pour le moment.</p>
+            <p className="text-muted-foreground italic">Aucun élève inscrit pour le moment.</p>
             <Link href="/univ/etudiants/nouveau">
-              <Button variant="link" className="text-emerald-600 font-bold">Inscrire votre premier étudiant</Button>
+              <Button variant="link" className="text-primary font-bold">Inscrire votre premier élève</Button>
             </Link>
           </div>
         ) : (

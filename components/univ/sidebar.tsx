@@ -23,7 +23,7 @@ import { useState, useEffect } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/univ/dashboard" },
-  { icon: GraduationCap, label: "Étudiants", href: "/univ/etudiants" },
+  { icon: GraduationCap, label: "Élèves", href: "/univ/etudiants" },
   { icon: BookOpen, label: "Pédagogie LMD", href: "/univ/pedagogie" },
   { icon: FileSpreadsheet, label: "Saisie des Notes", href: "/univ/notes" },
   { icon: Users, label: "Professeurs", href: "/univ/professors" },
@@ -44,7 +44,7 @@ export function UnivSidebar() {
       .then(data => setTenant(data.tenant));
   }, []);
 
-  const primaryColor = tenant?.primaryColor || '#059669';
+  const primaryColor = tenant?.primaryColor || '#4f46e5';
 
   return (
     <>
