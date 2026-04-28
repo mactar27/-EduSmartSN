@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     console.log(`Starting import of ${students?.length} students`);
     
     // On récupère l'établissement actif
-    const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
+    const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
     if (!tenants || tenants.length === 0) {
       return NextResponse.json({ error: 'Aucun établissement actif trouvé' }, { status: 404 });
     }

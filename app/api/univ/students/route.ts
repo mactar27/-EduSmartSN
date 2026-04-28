@@ -8,11 +8,7 @@ export async function GET(request: NextRequest) {
 
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      // Liste des tables pour debug
-      const tables = await query<any[]>('SHOW TABLES');
-      console.log("Available tables:", tables);
-
-      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
+      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
       if (tenants.length === 0) {
         return NextResponse.json({ data: [] });
       }

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     // For demo, if no tenantId, get the first active tenant
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
+      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
       if (tenants.length === 0) {
         // Retourner un état initial plutôt qu'une erreur 404
         return NextResponse.json({
