@@ -3,10 +3,10 @@ import { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    const etablissementsResult = await query<any[]>('SELECT COUNT(*) as count FROM Tenant WHERE status = "ACTIVE"');
-    const etudiantsResult = await query<any[]>('SELECT COUNT(*) as count FROM Student');
-    const professeursResult = await query<any[]>('SELECT COUNT(*) as count FROM Professor');
-    const paymentsResult = await query<any[]>('SELECT SUM(amount) as sum FROM Payment WHERE status = "PAID" AND createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)');
+    const etablissementsResult = await query<any[]>('SELECT COUNT(*) as count FROM etablissements WHERE is_active = 1');
+    const etudiantsResult = await query<any[]>('SELECT COUNT(*) as count FROM etudiants');
+    const professeursResult = await query<any[]>('SELECT COUNT(*) as count FROM users WHERE role = "professor"');
+    const paymentsResult = await query<any[]>('SELECT SUM(montant) as sum FROM paiements WHERE statut = "reussi" AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)');
 
     return NextResponse.json({
       total_etablissements: etablissementsResult[0]?.count || 0,

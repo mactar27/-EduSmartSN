@@ -134,16 +134,16 @@ export default function AdminDashboard() {
                   demoRequests.map((demo) => (
                     <tr key={demo.id} className="group hover:bg-muted/30 transition-colors">
                       <td className="py-4">
-                        <p className="font-bold text-foreground">{demo.etablissementName}</p>
+                        <p className="font-bold text-foreground">{demo.etablissement_name}</p>
                         <p className="text-xs text-muted-foreground">{demo.message?.substring(0, 50)}...</p>
                       </td>
-                      <td className="py-4 font-medium">{demo.contactName}</td>
+                      <td className="py-4 font-medium">{demo.contact_name}</td>
                       <td className="py-4 text-sm">
                         <p className="text-foreground">{demo.email}</p>
                         <p className="text-muted-foreground text-xs">{demo.phone}</p>
                       </td>
                       <td className="py-4 text-sm text-muted-foreground">
-                        {new Date(demo.createdAt).toLocaleDateString('fr-FR')}
+                        {new Date(demo.created_at).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="py-4 text-right">
                         <Button 
