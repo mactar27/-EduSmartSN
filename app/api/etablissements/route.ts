@@ -8,17 +8,19 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const etablissements = await query<any[]>(
-      `SELECT id, name, subdomain as slug FROM Tenant WHERE status = "ACTIVE" ORDER BY createdAt DESC LIMIT ${limit} OFFSET ${offset}`
+      `SELECT id, name, slug, logo_url, ville, student_count FROM etablissements WHERE is_active = 1 ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
     );
 
-    
-    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM Tenant WHERE status = "ACTIVE"');
+    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM etablissements WHERE is_active = 1');
 
     return NextResponse.json({
       data: etablissements.map(e => ({
-        ...e,
-        city: 'Sénégal',
-        student_count: 0
+        id: e.id,
+        name: e.name,
+        slug: e.slug,
+        city: e.ville || 'Sénégal',
+        student_count: e.student_count || 0,
+        logo_url: e.logo_url
       })),
       total: countResult[0]?.total || 0,
       limit,
