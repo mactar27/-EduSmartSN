@@ -55,14 +55,14 @@ export async function POST(
 
     // 4. Send Welcome Email
     try {
-      await resend.emails.send({
+      const { data, error: mailError } = await resend.emails.send({
         from: 'EduSmart SN <bienvenue@wockytech.xyz>',
         to: demo.email,
         subject: `Bienvenue sur EduSmart SN - Activation de votre espace ${demo.etablissement_name}`,
         html: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
             <div style="background-color: #4f46e5; padding: 40px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px; letter-spacing: -1px;">EDUSMART <span style="color: #ffffff; opacity: 0.8;">SN</span></h1>
+              <img src="https://edusmartsn.vercel.app/logo.png" alt="EduSmart SN" style="height: 60px; width: auto;">
             </div>
             <div style="padding: 40px; background-color: #ffffff;">
               <h2 style="color: #0f172a; margin-top: 0;">Félicitations, ${demo.contact_name} !</h2>
@@ -90,8 +90,14 @@ export async function POST(
           </div>
         `,
       });
-    } catch (mailError) {
-      console.warn("Mail failed but DB actions succeeded");
+
+      if (mailError) {
+        console.error("Resend Error:", mailError);
+      } else {
+        console.log("Resend Success:", data);
+      }
+    } catch (err) {
+      console.error("Critical Mail Error:", err);
     }
 
     // 5. Mark as processed (Update status instead of delete)
