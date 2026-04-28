@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { query } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -7,17 +7,10 @@ export const revalidate = 0;
 // GET all fees for the current tenant
 export async function GET(request: NextRequest) {
   try {
-    // Safety check for build time
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ fees: [] });
-    }
     const tenantId = request.headers.get('x-tenant-id');
     if (!tenantId) return NextResponse.json({ error: 'Tenant non identifié' }, { status: 400 });
 
-    const fees = await prisma.fee.findMany({
-      where: { tenantId },
-      orderBy: { createdAt: 'desc' }
-    });
+    const fees = await query<any[]>('SELECT * FROM Fee WHERE tenantId = ? ORDER BY createdAt DESC', [tenantId]);
 
     return NextResponse.json({ fees });
   } catch (error) {
@@ -32,19 +25,16 @@ export async function POST(request: NextRequest) {
     if (!tenantId) return NextResponse.json({ error: 'Tenant non identifié' }, { status: 400 });
 
     const { name, amount, category, recurrence } = await request.json();
+    const id = crypto.randomUUID();
 
-    const fee = await prisma.fee.create({
-      data: {
-        name,
-        amount: parseFloat(amount),
-        category,
-        recurrence,
-        tenantId
-      }
-    });
+    await query(
+      'INSERT INTO Fee (id, name, amount, category, recurrence, tenantId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      [id, name, parseFloat(amount), category, recurrence, tenantId]
+    );
 
-    return NextResponse.json({ fee });
+    return NextResponse.json({ fee: { id, name, amount, category, recurrence } });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Erreur création' }, { status: 500 });
   }
 }
@@ -58,9 +48,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id || !tenantId) return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
 
-    await prisma.fee.delete({
-      where: { id, tenantId }
-    });
+    await query('DELETE FROM Fee WHERE id = ? AND tenantId = ?', [id, tenantId]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

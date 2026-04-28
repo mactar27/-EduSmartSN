@@ -4,16 +4,21 @@ const globalForMysql = globalThis as unknown as {
   mysql: mysql.Pool | undefined;
 };
 
-export const db = globalForMysql.mysql ?? mysql.createPool({
-  host: '127.0.0.1',
-  port: 3306,
-  user: 'root',
-  password: 'M@tzo2705',
-  database: 'edusmart',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+const poolConfig = process.env.DATABASE_URL 
+  ? { uri: process.env.DATABASE_URL }
+  : {
+      host: '127.0.0.1',
+      port: 3306,
+      user: 'root',
+      password: 'M@tzo2705',
+      database: 'edusmart',
+    };
+
+export const db = globalForMysql.mysql ?? (
+  process.env.DATABASE_URL 
+    ? mysql.createPool(process.env.DATABASE_URL)
+    : mysql.createPool(poolConfig as any)
+);
 
 if (process.env.NODE_ENV !== 'production') {
   globalForMysql.mysql = db;
