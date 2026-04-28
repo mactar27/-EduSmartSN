@@ -12,27 +12,24 @@ export async function GET(request: NextRequest) {
     // For demo, if no tenantId, get the first active tenant
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM Tenant WHERE status = "ACTIVE" LIMIT 1');
+      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
       if (tenants.length === 0) {
         return NextResponse.json({ error: 'No tenant found' }, { status: 404 });
       }
       targetTenantId = tenants[0].id;
     }
 
-    const tenant = await query<any[]>('SELECT * FROM Tenant WHERE id = ?', [targetTenantId]);
-    const studentCount = await query<any[]>('SELECT COUNT(*) as count FROM Student WHERE tenantId = ?', [targetTenantId]);
-    const payments = await query<any[]>('SELECT SUM(p.amount) as total, p.method FROM Payment p JOIN Student s ON p.studentId = s.id WHERE s.tenantId = ? AND p.status = "PAID" GROUP BY p.method', [targetTenantId]);
+    const tenant = await query<any[]>('SELECT * FROM etablissements WHERE id = ?', [targetTenantId]);
+    const studentCount = await query<any[]>('SELECT COUNT(*) as count FROM etudiants WHERE etablissement_id = ?', [targetTenantId]);
+    const payments = await query<any[]>('SELECT SUM(p.montant) as total, p.methode FROM paiements p JOIN etudiants s ON p.etudiant_id = s.id WHERE s.etablissement_id = ? AND p.statut = "SUCCESS"', [targetTenantId]);
     
-    // Recent activities (mocked but based on real tables)
-    const recentEnrollments = await query<any[]>('SELECT COUNT(*) as count FROM Enrollment e JOIN Student s ON e.studentId = s.id WHERE s.tenantId = ?', [targetTenantId]);
-
     return NextResponse.json({
       tenant: tenant[0],
       stats: {
         students: studentCount[0]?.count || 0,
-        enrollmentRate: recentEnrollments[0]?.count > 0 ? "95%" : "0%",
+        enrollmentRate: "95%", // Mocked for now
         totalRevenue: payments.reduce((acc: number, p: any) => acc + (p.total || 0), 0),
-        paymentsByMethod: payments
+        paymentsByMethod: payments.map((p: any) => ({ method: p.methode, total: p.total }))
       }
     });
   } catch (error) {
