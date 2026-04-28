@@ -99,18 +99,23 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-6 sm:pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-          <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-            © {new Date().getFullYear()} EduSmart SN. Tous droits réservés.
-          </p>
+          <div className="text-center sm:text-left space-y-1">
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              © {new Date().getFullYear()} EduSmart SN. Tous droits réservés.
+            </p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground/60 uppercase tracking-widest">
+              Réalisé par <a href="https://wockytech.xyz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-black">WockyTech</a>
+            </p>
+          </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm text-muted-foreground">Fait avec</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Propulsé avec</span>
             <span className="text-destructive">❤️</span>
             <span className="text-xs sm:text-sm text-muted-foreground">au Sénégal</span>
-            <span className="flex gap-0.5">
-              <span className="w-2.5 sm:w-3 h-3 sm:h-4 bg-secondary rounded-sm" />
-              <span className="w-2.5 sm:w-3 h-3 sm:h-4 bg-accent rounded-sm" />
-              <span className="w-2.5 sm:w-3 h-3 sm:h-4 bg-destructive rounded-sm" />
-            </span>
+            <div className="flex gap-0.5 ml-1">
+              <span className="w-3 h-4 bg-[#00853f] rounded-sm" />
+              <span className="w-3 h-4 bg-[#fdef42] rounded-sm" />
+              <span className="w-3 h-4 bg-[#e31b23] rounded-sm" />
+            </div>
           </div>
         </div>
       </div>
