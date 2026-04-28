@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const demandes = await query<any[]>(
-      `SELECT * FROM demandes_demo ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+      `SELECT * FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
     );
     
-    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM demandes_demo');
+    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL');
 
     return NextResponse.json({
       data: demandes,
