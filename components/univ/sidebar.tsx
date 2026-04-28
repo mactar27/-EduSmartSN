@@ -27,7 +27,7 @@ const menuItems = [
   { icon: FileSpreadsheet, label: "Saisie des Notes", href: "/univ/notes" },
   { icon: Users, label: "Professeurs", href: "/univ/professors" },
   { icon: Calendar, label: "Emploi du temps", href: "/univ/schedule" },
-  { icon: Wallet, label: "Finances", href: "/univ/finance" },
+  { icon: Wallet, label: "Régie Financière", href: "/univ/regie-financiere" },
   { icon: Settings, label: "Configuration", href: "/univ/settings" },
 ];
 

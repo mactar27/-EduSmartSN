@@ -48,6 +48,7 @@ model Tenant {
   academicYears AcademicYear[]
   payments      Payment[]
   students      Student[]
+  fees          Fee[]
 }
 
 model User {
@@ -184,6 +185,18 @@ model Grade {
   subject   Subject  @relation(fields: [subjectId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Fee {
+  id          String   @id @default(cuid())
+  name        String
+  amount      Float
+  category    String   // INSCRIPTION, SCOLARITE, EXAMEN, AUTRE
+  recurrence  String   // ONCE, MONTHLY
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model PushSubscription {
