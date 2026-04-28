@@ -4,11 +4,12 @@ import { query } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  try {
     const [cols]: any = await query("SHOW COLUMNS FROM users LIKE 'role'");
     
     return NextResponse.json({ 
       status: "Détails colonne role", 
-      type: cols[0].Type // Affichera enum('value1', 'value2'...)
+      type: cols[0].Type
     });
   } catch (error: any) {
     return NextResponse.json({ 
