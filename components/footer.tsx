@@ -101,7 +101,7 @@ export function Footer() {
         <div className="pt-6 sm:pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <div className="text-center sm:text-left space-y-1">
             <p className="text-xs sm:text-sm text-muted-foreground">
-              © {new Date().getFullYear()} EduSmart SN. Tous droits réservés.
+              © {new Date().getFullYear()} EduSmart SN. Plateforme de Souveraineté Numérique.
             </p>
             <p className="text-[10px] sm:text-xs text-muted-foreground/60 uppercase tracking-widest">
               Réalisé par <a href="https://wockytech.xyz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-black">WockyTech</a>
