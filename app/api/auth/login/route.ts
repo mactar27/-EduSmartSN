@@ -17,7 +17,11 @@ export async function POST(request: NextRequest) {
     const users = await query<any[]>(`SELECT * FROM users WHERE email = ? AND ${passwordField} = ?`, [email, password]);
 
     if (users.length === 0) {
-      return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
+      const count: any = await query('SELECT COUNT(*) as total FROM users');
+      return NextResponse.json({ 
+        error: 'Identifiants incorrects', 
+        debug: `Nombre d'utilisateurs en base : ${count[0].total}` 
+      }, { status: 401 });
     }
 
     const user = users[0];
