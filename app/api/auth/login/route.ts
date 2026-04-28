@@ -5,7 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    const users = await query<any[]>('SELECT * FROM User WHERE email = ? AND password = ?', [email, password]);
+    // Correction : Utilisation de la table 'users' au lieu de 'User'
+    const users = await query<any[]>('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
 
     if (users.length === 0) {
       return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
@@ -13,20 +14,17 @@ export async function POST(request: NextRequest) {
 
     const user = users[0];
 
-    // For a real app, we would set a session cookie here.
-    // For this demo, we'll just return the user data and redirect client-side.
-
     return NextResponse.json({ 
       message: 'Login successful',
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
-        tenantId: user.tenantId
+        tenantId: user.etablissement_id // Alignement probable sur le schéma FR
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Erreur lors de la connexion' }, { status: 500 });
+    return NextResponse.json({ error: 'Erreur lors de la connexion : ' + error.message }, { status: 500 });
   }
 }
