@@ -56,7 +56,7 @@ export async function POST(
     // 4. Send Welcome Email
     try {
       await resend.emails.send({
-        from: 'EduSmart SN <onboarding@resend.dev>',
+        from: 'EduSmart SN <bienvenue@wockytech.xyz>',
         to: demo.email,
         subject: `Bienvenue sur EduSmart SN - Activation de votre espace ${demo.etablissement_name}`,
         html: `
