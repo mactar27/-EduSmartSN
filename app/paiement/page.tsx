@@ -102,10 +102,11 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="flex justify-center gap-6 opacity-50 grayscale hover:grayscale-0 transition-all">
-            <Image src="https://paytech.sn/assets/img/wave.png" alt="Wave" width={60} height={30} className="object-contain" />
-            <Image src="https://paytech.sn/assets/img/orange-money.png" alt="Orange Money" width={60} height={30} className="object-contain" />
-            <Image src="https://paytech.sn/assets/img/visa-mastercard.png" alt="Visa/Mastercard" width={80} height={30} className="object-contain" />
+          <div className="flex justify-center items-center gap-6 opacity-80 hover:opacity-100 transition-all bg-white p-4 rounded-2xl border border-border shadow-sm">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Wave_Mobile_Money_logo.png" alt="Wave" className="h-8 w-auto object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/fr/thumb/f/ff/Orange_Money_logo.svg/1200px-Orange_Money_logo.svg.png" alt="Orange Money" className="h-8 w-auto object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="Visa" className="h-4 w-auto object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="Mastercard" className="h-8 w-auto object-contain" />
           </div>
         </div>
 
