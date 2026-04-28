@@ -16,14 +16,18 @@ export async function GET(request: NextRequest) {
     }
 
     const students = await query<any[]>(
-      'SELECT id, name, student_id as studentId, photo_url as photoUrl, department FROM etudiants WHERE etablissement_id = ? ORDER BY name ASC',
+      'SELECT * FROM etudiants WHERE etablissement_id = ? ORDER BY name ASC',
       [targetTenantId]
     );
 
     return NextResponse.json({ data: students });
-  } catch (error) {
-    console.error('Error fetching students:', error);
-    return NextResponse.json({ error: 'Failed to fetch students' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Detailed Error fetching students:', error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch students', 
+      details: error.message,
+      stack: error.stack
+    }, { status: 500 });
   }
 }
 
