@@ -109,23 +109,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border"></span>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground font-semibold tracking-wider">Accès Rapide (Démo)</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1">
-            <Link href="/admin/dashboard" className="w-full">
-              <Button variant="outline" className="w-full h-24 flex flex-col gap-2 rounded-xl border-border hover:border-primary hover:text-primary transition-all">
-                <ShieldCheck size={24} />
-                <span className="text-xs font-bold uppercase">Super Admin</span>
-              </Button>
-            </Link>
-          </div>
+          {/* Section Démo retirée pour le mode réel */}
         </div>
       </div>
     </div>
