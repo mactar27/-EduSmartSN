@@ -3,13 +3,20 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // Test de connexion simple
+    // Test de connexion réussi ! On affiche les colonnes proprement.
     const columns = await query<any[]>('SHOW COLUMNS FROM etudiants');
-    const names = columns.map(c => c.Field).join(' | ');
+    const names = columns.map(c => c.Field).join(', ');
     
     return NextResponse.json({ 
-      diagnostic: "LISTE_COLONNES",
-      data: names 
+      data: [
+        { 
+          id: 1, 
+          name: "STRUCTURE_DE_LA_BASE", 
+          studentId: "COLONNES", 
+          department: names,
+          statut: "actif"
+        }
+      ]
     });
   } catch (error: any) {
     return NextResponse.json({ 
