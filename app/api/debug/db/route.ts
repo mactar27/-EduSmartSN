@@ -13,13 +13,18 @@ export async function GET() {
       ssl: { rejectUnauthorized: false }
     });
     
-    const [columns] = await pool.query('DESCRIBE demandes_demo');
-    await pool.end();
-
-    return NextResponse.json({ 
-      status: "Analyse de la table demandes_demo", 
-      columns: columns 
-    });
+    try {
+      const [rows] = await pool.query('SELECT * FROM etablissements LIMIT 1');
+      await pool.end();
+      return NextResponse.json({ status: "Requête réussie !", data: rows });
+    } catch (sqlError: any) {
+      await pool.end();
+      return NextResponse.json({ 
+        status: "Erreur SQL sur etablissements", 
+        message: sqlError.message,
+        code: sqlError.code
+      }, { status: 500 });
+    }
   } catch (error: any) {
     return NextResponse.json({ 
       status: "Échec du Pool", 
