@@ -128,7 +128,7 @@ export default function GradeEntry() {
           <table className="w-full">
             <thead>
               <tr className="text-left text-xs text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">
-                <th className="px-8 py-5 font-bold">Étudiant</th>
+                <th className="px-8 py-5 font-bold">Élève</th>
                 <th className="px-8 py-5 font-bold">Matricule</th>
                 <th className="px-8 py-5 font-bold text-center w-48">Note / 20</th>
                 <th className="px-8 py-5 font-bold">Statut</th>
@@ -180,7 +180,7 @@ export default function GradeEntry() {
 
       <div className="flex justify-center">
         <p className="text-sm text-muted-foreground italic bg-muted/30 px-6 py-3 rounded-full border border-dashed border-border">
-          Astuce : Utilisez la touche <b>Tab</b> pour passer rapidement d'un étudiant à l'autre.
+          Astuce : Utilisez la touche <b>Tab</b> pour passer rapidement d'un élève à l'autre.
         </p>
       </div>
     </div>

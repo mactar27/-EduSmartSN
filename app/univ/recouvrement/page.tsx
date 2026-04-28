@@ -74,7 +74,7 @@ export default function RecoveryDashboard() {
             </div>
             <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">452</span>
           </div>
-          <p className="text-sm font-medium text-muted-foreground">Étudiants à Jour</p>
+          <p className="text-sm font-medium text-muted-foreground">Élèves à Jour</p>
           <h3 className="text-3xl font-black mt-1">78% <span className="text-sm font-bold opacity-50">Effectif</span></h3>
         </Card>
 
@@ -177,7 +177,7 @@ export default function RecoveryDashboard() {
             <div className="p-8 border-b border-border flex flex-col md:flex-row justify-between gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <Input placeholder="Rechercher un étudiant ou une transaction..." className="pl-12 h-12 bg-muted/20 border-none rounded-2xl" />
+                <Input placeholder="Rechercher un élève ou une transaction..." className="pl-12 h-12 bg-muted/20 border-none rounded-2xl" />
               </div>
               <Button variant="outline" className="h-12 rounded-2xl border-border gap-2">
                 <Filter size={18} /> Filtres
@@ -190,7 +190,7 @@ export default function RecoveryDashboard() {
                   <thead>
                     <tr className="text-left text-[10px] text-muted-foreground uppercase tracking-[0.2em] bg-muted/10">
                       <th className="px-8 py-4 font-black">Date & Heure</th>
-                      <th className="px-8 py-4 font-black">Étudiant</th>
+                      <th className="px-8 py-4 font-black">Élève</th>
                       <th className="px-8 py-4 font-black">Type</th>
                       <th className="px-8 py-4 font-black">Montant</th>
                       <th className="px-8 py-4 font-black">Méthode</th>

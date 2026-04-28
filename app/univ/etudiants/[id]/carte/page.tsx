@@ -32,7 +32,7 @@ export default function StudentCardPage() {
   }
 
   if (isLoading) return <div className="p-20 text-center">Génération de la carte...</div>
-  if (!student) return <div className="p-20 text-center text-red-500">Étudiant non trouvé.</div>
+  if (!student) return <div className="p-20 text-center text-red-500">Élève non trouvé.</div>
 
   const publicProfileUrl = `https://edusmart-sn.vercel.app/verify/${student.studentId}`
 
@@ -71,7 +71,7 @@ export default function StudentCardPage() {
                 <Image src="/logo.png" alt="Logo" width={100} height={35} className="h-8 w-auto brightness-0 invert" />
               </div>
               <div className="text-right">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">Carte Étudiant Officielle</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">Carte Élève Officielle</p>
                 <p className="text-[10px] text-white/50">Année 2024 - 2025</p>
               </div>
             </div>

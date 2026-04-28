@@ -11,7 +11,7 @@ export function UnivHeader() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
         <Input 
           className="pl-10 h-11 bg-muted/50 border-none rounded-xl" 
-          placeholder="Rechercher un étudiant, un cours..." 
+          placeholder="Rechercher un élève, un cours..." 
         />
       </div>
 

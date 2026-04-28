@@ -70,7 +70,7 @@ export default function StudentListPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          <div className="col-span-full py-20 text-center">Chargement des étudiants réels...</div>
+          <div className="col-span-full py-20 text-center">Chargement des élèves réels...</div>
         ) : students.length === 0 ? (
           <div className="col-span-full py-20 text-center space-y-4">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto text-muted-foreground">

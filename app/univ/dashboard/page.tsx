@@ -47,7 +47,7 @@ function DashboardContent() {
   if (!data?.tenant) return <div className="p-10 text-center text-red-500">Aucun établissement trouvé dans la base.</div>;
 
   const stats = [
-    { label: "Étudiants Inscrits", value: data.stats.students.toLocaleString(), icon: Users, bg: "bg-blue-50", color: "text-blue-600" },
+    { label: "Élèves Inscrits", value: data.stats.students.toLocaleString(), icon: Users, bg: "bg-blue-50", color: "text-blue-600" },
     { label: "Validation Dossiers", value: data.stats.enrollmentRate, icon: CheckCircle2, bg: "bg-emerald-50", color: "text-emerald-600" },
     { label: "Recettes Globales", value: `${data.stats.totalRevenue.toLocaleString()} F`, icon: Wallet, bg: "bg-amber-50", color: "text-amber-600" },
     { label: "Alertes Système", value: "0", icon: AlertCircle, bg: "bg-rose-50", color: "text-rose-600" },
