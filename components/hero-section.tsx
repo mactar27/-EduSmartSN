@@ -20,7 +20,7 @@ export function HeroSection() {
 
   const displayStats = [
     { value: `${stats?.total_etablissements || 50}+`, label: "Établissements" },
-    { value: `${(stats?.total_etudiants / 1000).toFixed(0) || 25}K+`, label: "Étudiants" },
+    { value: `${stats?.total_etudiants ? (stats.total_etudiants / 1000).toFixed(0) : '25'}K+`, label: "Étudiants" },
     { value: "99.9%", label: "Disponibilité" },
     { value: "3", label: "Paiements mobiles" },
   ]
