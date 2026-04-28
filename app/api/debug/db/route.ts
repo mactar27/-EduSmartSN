@@ -13,10 +13,13 @@ export async function GET() {
       ssl: { rejectUnauthorized: false }
     });
     
-    const [rows] = await pool.query('SELECT 1 as test');
+    const [tables] = await pool.query('SHOW TABLES');
     await pool.end();
 
-    return NextResponse.json({ status: "Pool connecté avec succès !", data: rows });
+    return NextResponse.json({ 
+      status: "Connexion OK", 
+      tables: tables 
+    });
   } catch (error: any) {
     return NextResponse.json({ 
       status: "Échec du Pool", 
