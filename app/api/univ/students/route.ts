@@ -5,11 +5,11 @@ export async function GET(request: NextRequest) {
   try {
     // On demande la structure réelle de la table
     const columns = await query<any[]>('DESCRIBE etudiants');
-    const columnNames = columns.map(c => c.Field);
+    const columnNames = columns.map(c => c.Field).join(', ');
     
     return NextResponse.json({ 
       error: 'DIAGNOSTIC_MODE',
-      columnNames: columnNames 
+      columns: columnNames 
     });
   } catch (error: any) {
     return NextResponse.json({ 
