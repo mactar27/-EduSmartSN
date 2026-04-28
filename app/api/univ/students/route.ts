@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-// Force deploy: version 1.0.2 - Synchronisation finale effectuée
+/**
+ * API Route: Students Management
+ * Version: 2.1.0 - Full SQL Join Implementation
+ * This comment is here to trigger a fresh Vercel build.
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
