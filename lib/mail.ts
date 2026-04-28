@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Use a placeholder if the key is missing (prevents build-time crashes on Vercel)
+const apiKey = process.env.RESEND_API_KEY || 're_placeholder_for_build';
+export const resend = new Resend(apiKey);
 
 export async function sendDemoNotification(data: {
   etablissement_name: string;
