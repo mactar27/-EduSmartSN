@@ -3,6 +3,7 @@ import { query } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+export async function GET() {
   try {
     // 1. Créer un établissement par défaut
     await query(
