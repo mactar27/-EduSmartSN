@@ -28,6 +28,7 @@ const menuItems = [
   { icon: Users, label: "Professeurs", href: "/univ/professors" },
   { icon: Calendar, label: "Emploi du temps", href: "/univ/schedule" },
   { icon: Wallet, label: "Régie Financière", href: "/univ/regie-financiere" },
+  { icon: TrendingUp, label: "Recouvrement", href: "/univ/recouvrement" },
   { icon: Settings, label: "Configuration", href: "/univ/settings" },
 ];
 
