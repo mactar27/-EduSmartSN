@@ -4,18 +4,11 @@ import { query } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  try {
-    // Insérer le Super Admin (Mactar)
-    // Note : On met le mot de passe en brut dans 'password_hash' pour le test initial
-    await query(
-      `INSERT INTO users (email, password_hash, first_name, last_name, role, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
-      ['ndiayeamadoumactar3@gmail.com', 'M@tzo2705', 'Amadou Mactar', 'Ndiaye', 'SUPER_ADMIN']
-    );
-
+    const [cols]: any = await query("SHOW COLUMNS FROM users LIKE 'role'");
+    
     return NextResponse.json({ 
-      status: "Succès !", 
-      message: "Compte Super Admin créé pour ndiayeamadoumactar3@gmail.com. Vous pouvez maintenant vous connecter." 
+      status: "Détails colonne role", 
+      type: cols[0].Type // Affichera enum('value1', 'value2'...)
     });
   } catch (error: any) {
     return NextResponse.json({ 
