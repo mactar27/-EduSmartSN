@@ -1,0 +1,22 @@
+{
+  "name": "EduSmart SN",
+  "short_name": "EduSmart",
+  "description": "Souveraineté Numérique pour l'Éducation au Sénégal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#059669",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
