@@ -3,17 +3,12 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // On vérifie d'abord si on peut faire une requête simple
-    const test = await query<any[]>('SELECT COUNT(*) as total FROM etudiants');
+    // On demande la structure réelle de la table
+    const columns = await query<any[]>('DESCRIBE etudiants');
     
-    // Si ça marche, on récupère les élèves
-    const students = await query<any[]>(
-      'SELECT name, student_id, department, statut FROM etudiants LIMIT 50'
-    );
-
     return NextResponse.json({ 
-      data: students || [],
-      test: test[0]?.total
+      error: 'DIAGNOSTIC_MODE',
+      columns: columns 
     });
   } catch (error: any) {
     return NextResponse.json({ 
