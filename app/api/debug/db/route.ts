@@ -14,10 +14,15 @@ export async function GET() {
     });
     
     try {
-      const [columns]: any = await pool.query('DESCRIBE etablissements');
+      const [studentCols]: any = await pool.query('DESCRIBE etudiants');
+      const [paymentCols]: any = await pool.query('DESCRIBE paiements');
       await pool.end();
-      const columnNames = columns.map((c: any) => c.Field || c.Champ || Object.values(c)[0]);
-      return NextResponse.json({ status: "Structure etablissements", columnNames });
+      
+      return NextResponse.json({ 
+        status: "Structure tables", 
+        etudiants: studentCols.map((c: any) => c.Field || c.Champ || Object.values(c)[0]),
+        paiements: paymentCols.map((c: any) => c.Field || c.Champ || Object.values(c)[0])
+      });
     } catch (sqlError: any) {
       await pool.end();
       return NextResponse.json({ status: "Erreur", message: sqlError.message }, { status: 500 });
