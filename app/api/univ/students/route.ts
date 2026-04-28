@@ -15,10 +15,21 @@ export async function GET(request: NextRequest) {
       targetTenantId = tenants[0].id;
     }
 
-    const students = await query<any[]>(
+    let students = await query<any[]>(
       'SELECT * FROM etudiants',
       []
     );
+
+    if (students.length === 0) {
+      console.log("Table is empty, inserting test student...");
+      await query(
+        `INSERT INTO etudiants (name, email, student_id, department, etablissement_id, statut, created_at, updated_at) 
+         VALUES ('TEST PERSISTANCE', 'test@edusmart.sn', 'TEST-001', 'Debug', ?, 'actif', NOW(), NOW())`,
+        [targetTenantId || 1]
+      );
+      // Re-fetch
+      students = await query<any[]>('SELECT * FROM etudiants', []);
+    }
 
     // Debug: Compter le nombre total d'élèves dans la base pour voir s'ils existent
     const totalInDb = await query<any[]>('SELECT COUNT(*) as count FROM etudiants');
