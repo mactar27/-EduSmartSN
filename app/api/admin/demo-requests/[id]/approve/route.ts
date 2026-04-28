@@ -77,7 +77,7 @@ export async function POST(
             </div>
 
             <div style="text-align: center; margin-top: 40px;">
-              <a href="http://localhost:3000/login" style="background-color: #3b82f6; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);">
+              <a href="https://edusmartsn.vercel.app/login" style="background-color: #3b82f6; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);">
                 Accéder au Dashboard
               </a>
             </div>
