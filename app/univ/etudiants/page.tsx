@@ -36,6 +36,48 @@ export default function StudentListPage() {
     }
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const csv = event.target?.result as string;
+      const lines = csv.split('\n');
+      const headers = lines[0].split(',');
+      
+      const data = lines.slice(1).map(line => {
+        const values = line.split(',');
+        return {
+          name: values[0],
+          email: values[1],
+          studentId: values[2] || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`,
+          department: values[3] || 'Général'
+        };
+      }).filter(item => item.name);
+
+      try {
+        const res = await fetch('/api/univ/students/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ students: data })
+        });
+
+        if (res.ok) {
+          alert(`${data.length} élèves importés avec succès !`);
+          fetchStudents();
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'importation.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -44,9 +86,20 @@ export default function StudentListPage() {
           <p className="text-muted-foreground mt-1">Gérez les dossiers et générez les cartes d'identité biométriques.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="h-12 rounded-xl gap-2 font-bold border-primary text-primary hover:bg-primary/5">
+          <input 
+            type="file" 
+            id="csv-import" 
+            accept=".csv" 
+            className="hidden" 
+            onChange={handleFileUpload}
+          />
+          <Button 
+            variant="outline" 
+            className="h-12 rounded-xl gap-2 font-bold border-primary text-primary hover:bg-primary/5"
+            onClick={() => document.getElementById('csv-import')?.click()}
+          >
             <FileSpreadsheet size={20} />
-            Import Excel
+            Import CSV
           </Button>
           <Link href="/univ/etudiants/nouveau">
             <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">

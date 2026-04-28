@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM Tenant WHERE status = "ACTIVE" LIMIT 1');
+      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
       if (tenants.length === 0) {
         return NextResponse.json({ data: [] });
       }
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     const students = await query<any[]>(
-      'SELECT * FROM Student WHERE tenantId = ? ORDER BY name ASC',
+      'SELECT id, name, student_id as studentId, photo_url as photoUrl, department FROM etudiants WHERE etablissement_id = ? ORDER BY name ASC',
       [targetTenantId]
     );
 
@@ -32,26 +32,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, studentId, department, photoUrl, birthDate } = body;
 
-    // Get current tenant (for demo, use the first one)
-    const tenants = await query<any[]>('SELECT id FROM Tenant WHERE status = "ACTIVE" LIMIT 1');
+    const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
     const tenantId = tenants[0].id;
 
-    // 1. Create a User for the student
-    const userId = crypto.randomUUID();
-    const email = `${studentId.toLowerCase()}@edusmart.sn`;
-    await query(
-      'INSERT INTO User (id, email, password, name, role, tenantId, createdAt, updatedAt) VALUES (?, ?, ?, ?, "STUDENT", ?, NOW(), NOW())',
-      [userId, email, 'student123', name, tenantId]
+    // 1. Create the Student profile directly (we'll link to users later if needed)
+    const result = await query<any>(
+      'INSERT INTO etudiants (name, email, student_id, department, photo_url, etablissement_id, statut, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, "actif", NOW(), NOW())',
+      [name, `${studentId.toLowerCase()}@wockytech.xyz`, studentId, department, photoUrl, tenantId]
     );
 
-    // 2. Create the Student profile
-    const id = crypto.randomUUID();
-    await query(
-      'INSERT INTO Student (id, userId, studentId, name, photoUrl, department, birthDate, tenantId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, userId, studentId, name, photoUrl, department, birthDate, tenantId]
-    );
-
-    return NextResponse.json({ message: 'Student created successfully', id }, { status: 201 });
+    return NextResponse.json({ message: 'Student created successfully', id: result.insertId }, { status: 201 });
   } catch (error) {
     console.error('Error creating student:', error);
     return NextResponse.json({ error: 'Failed to create student' }, { status: 500 });
