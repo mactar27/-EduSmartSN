@@ -3,33 +3,22 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const tenantId = searchParams.get('tenantId');
-
-    let targetTenantId = tenantId;
-    if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
-      if (tenants.length === 0) {
-        return NextResponse.json({ data: [] });
-      }
-      targetTenantId = tenants[0].id;
-    }
-
+    // On vérifie d'abord si on peut faire une requête simple
+    const test = await query<any[]>('SELECT COUNT(*) as total FROM etudiants');
+    
+    // Si ça marche, on récupère les élèves
     const students = await query<any[]>(
-      'SELECT id, name, student_id as studentId, department, statut FROM etudiants ORDER BY id DESC',
-      []
+      'SELECT name, student_id, department, statut FROM etudiants LIMIT 50'
     );
 
     return NextResponse.json({ 
-      data: students,
-      count: students.length
+      data: students || [],
+      test: test[0]?.total
     });
   } catch (error: any) {
-    console.error('API Error:', error);
     return NextResponse.json({ 
-      error: 'SQL_ERROR', 
-      message: error.message,
-      sqlMessage: error.sqlMessage // Spécifique à mysql2
+      error: 'CRITICAL_DB_ERROR', 
+      message: error.message 
     }, { status: 500 });
   }
 }
