@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       `SELECT * FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
     );
     
-    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL');
+    const countResult = await query<any[]>("SELECT COUNT(*) as total FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL");
 
     return NextResponse.json({
       data: demandes,
