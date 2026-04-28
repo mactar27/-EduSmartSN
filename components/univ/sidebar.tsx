@@ -12,6 +12,7 @@ import {
   Wallet,
   Settings,
   FileSpreadsheet,
+  TrendingUp,
   LogOut,
   Menu,
   X
