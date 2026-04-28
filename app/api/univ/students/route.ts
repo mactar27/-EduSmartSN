@@ -3,17 +3,23 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // On demande la structure réelle de la table
-    const columns = await query<any[]>('DESCRIBE etudiants');
-    const columnNames = columns.map(c => c.Field).join(', ');
-    
+    const students = await query<any[]>(
+      'SELECT id, nom, prenom, matricule as studentId, filiere as department, statut FROM etudiants ORDER BY id DESC',
+      []
+    );
+
+    const formattedStudents = students.map(s => ({
+      ...s,
+      name: `${s.prenom} ${s.nom}`.trim()
+    }));
+
     return NextResponse.json({ 
-      error: 'DIAGNOSTIC_MODE',
-      columns: columnNames 
+      data: formattedStudents,
+      count: formattedStudents.length
     });
   } catch (error: any) {
     return NextResponse.json({ 
-      error: 'CRITICAL_DB_ERROR', 
+      error: 'SQL_ERROR', 
       message: error.message 
     }, { status: 500 });
   }
@@ -22,20 +28,24 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, studentId, department, photoUrl, birthDate } = body;
+    const { name, studentId, department, photoUrl } = body;
 
-    const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
+    const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
     const tenantId = tenants[0].id;
 
-    // 1. Create the Student profile directly (we'll link to users later if needed)
+    // Séparer le nom complet
+    const nameParts = name.split(' ');
+    const prenom = nameParts.slice(0, -1).join(' ') || 'Prénom';
+    const nom = nameParts.slice(-1)[0] || name;
+
     const result = await query<any>(
-      'INSERT INTO etudiants (name, email, student_id, department, photo_url, etablissement_id, statut, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, "actif", NOW(), NOW())',
-      [name, `${studentId.toLowerCase()}@wockytech.xyz`, studentId, department, photoUrl, tenantId]
+      'INSERT INTO etudiants (prenom, nom, email, matricule, filiere, photo_url, etablissement_id, statut, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, "actif", NOW(), NOW())',
+      [prenom, nom, `${studentId.toLowerCase()}@wockytech.xyz`, studentId, department, photoUrl, tenantId]
     );
 
-    return NextResponse.json({ message: 'Student created successfully', id: result.insertId }, { status: 201 });
-  } catch (error) {
+    return NextResponse.json({ message: 'Élève créé avec succès', id: result.insertId }, { status: 201 });
+  } catch (error: any) {
     console.error('Error creating student:', error);
-    return NextResponse.json({ error: 'Failed to create student' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create student', details: error.message }, { status: 500 });
   }
 }

@@ -17,10 +17,15 @@ export async function POST(request: NextRequest) {
     let successCount = 0;
     for (const student of students) {
       try {
+        // Séparer le nom complet
+        const nameParts = student.name.split(' ');
+        const prenom = nameParts.slice(0, -1).join(' ') || 'Prénom';
+        const nom = nameParts.slice(-1)[0] || student.name;
+
         await query(
-          `INSERT INTO etudiants (name, email, student_id, department, etablissement_id, statut, created_at, updated_at) 
-           VALUES (?, ?, ?, ?, ?, 'actif', NOW(), NOW())`,
-          [student.name, student.email || '', student.studentId || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`, student.department || 'Général', tenantId]
+          `INSERT INTO etudiants (prenom, nom, email, matricule, filiere, etablissement_id, statut, created_at, updated_at) 
+           VALUES (?, ?, ?, ?, ?, ?, 'actif', NOW(), NOW())`,
+          [prenom, nom, student.email || '', student.studentId || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`, student.department || 'Général', tenantId]
         );
         successCount++;
       } catch (err) {
