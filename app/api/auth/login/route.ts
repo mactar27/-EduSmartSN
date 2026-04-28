@@ -5,8 +5,14 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    // Correction : Utilisation de la table 'users' au lieu de 'User'
-    const users = await query<any[]>('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
+    // Debug temporaire pour voir les colonnes
+    const [cols]: any = await query('DESCRIBE users');
+    console.log('Columns in users:', cols);
+    
+    // Tentative avec le nom probable 'mot_de_passe' ou similar
+    const passwordField = cols.find((c: any) => c.Field.includes('pass') || c.Field.includes('mot')).Field;
+    
+    const users = await query<any[]>(`SELECT * FROM users WHERE email = ? AND ${passwordField} = ?`, [email, password]);
 
     if (users.length === 0) {
       return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
