@@ -26,7 +26,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: parseInt(amount),
-          studentId: studentId || "DEMO-STU-001",
+          studentId: studentId,
           description: "Frais d'inscription académique EduSmart"
         })
       })

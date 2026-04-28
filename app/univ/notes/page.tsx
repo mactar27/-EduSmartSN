@@ -20,15 +20,17 @@ export default function GradeEntry() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    // Mock students for the subject
-    setStudents([
-      { id: "S1", name: "Mactar Ndiaye", matricule: "UAM-24-001", grade: "" },
-      { id: "S2", name: "Aminata Diallo", matricule: "UAM-24-002", grade: "" },
-      { id: "S3", name: "Ibrahima Sarr", matricule: "UAM-24-003", grade: "" },
-      { id: "S4", name: "Fatou Kiné", matricule: "UAM-24-004", grade: "" },
-      { id: "S5", name: "Moussa Sow", matricule: "UAM-24-005", grade: "" },
-    ])
-  }, [])
+    const fetchStudents = async () => {
+      try {
+        const res = await fetch(`/api/univ/students?subjectId=${selectedSubject}`)
+        const data = await res.json()
+        if (data.students) setStudents(data.students)
+      } catch (e) {
+        console.error("Erreur chargement étudiants:", e)
+      }
+    }
+    fetchStudents()
+  }, [selectedSubject])
 
   const handleGradeChange = (id: string, value: string) => {
     const numValue = parseFloat(value)
@@ -40,25 +42,38 @@ export default function GradeEntry() {
   const handleSave = async () => {
     setIsSaving(true)
     
-    // Simulate push notification trigger
     try {
+      // Sauvegarde réelle des notes
+      await fetch('/api/univ/grades/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectId: selectedSubject,
+          grades: students.filter(s => s.grade !== "").map(s => ({
+            studentId: s.id,
+            value: parseFloat(s.grade)
+          }))
+        })
+      })
+
+      // Envoi des notifications Push réelles
       await fetch('/api/push/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: "Nouvelle Note Disponible 🎓",
-          body: `Matière: Programmation C. Moyenne de classe: 13.5/20. Consultez votre relevé sur EduSmart !`,
+          body: `Vos résultats pour la matière sélectionnée sont en ligne.`,
           url: "/univ/dashboard"
         })
       })
+      
+      alert("Notes enregistrées et notifications envoyées ! 🚀")
     } catch (e) {
       console.error(e)
-    }
-
-    setTimeout(() => {
+      alert("Erreur lors de l'enregistrement.")
+    } finally {
       setIsSaving(false)
-      alert("Notes enregistrées et notifications Push envoyées aux étudiants ! 🚀")
-    }, 1500)
+    }
   }
 
   return (
