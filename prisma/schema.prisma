@@ -47,6 +47,7 @@ model Tenant {
   faculties     Faculty[]
   academicYears AcademicYear[]
   payments      Payment[]
+  students      Student[]
 }
 
 model User {
@@ -77,6 +78,7 @@ model Student {
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   enrollments Enrollment[]
+  grades      Grade[]
 }
 
 model Professor {
@@ -101,6 +103,7 @@ model Department {
   name      String
   facultyId String
   faculty   Faculty @relation(fields: [facultyId], references: [id])
+  unitOfTeaches UnitOfTeaching[]
 }
 
 model AcademicYear {
@@ -148,4 +151,36 @@ model DemoRequest {
   createdAt         DateTime @default(now())
 }
 
+model UnitOfTeaching {
+  id           String     @id @default(cuid())
+  name         String
+  code         String     @unique
+  credits      Int        @default(0)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  subjects     Subject[]
+}
 
+model Subject {
+  id           String         @id @default(cuid())
+  name         String
+  code         String         @unique
+  credits      Int
+  coefficient  Float          @default(1.0)
+  ueId         String
+  ue           UnitOfTeaching @relation(fields: [ueId], references: [id])
+  grades       Grade[]
+}
+
+model Grade {
+  id        String   @id @default(cuid())
+  value     Float
+  isResit   Boolean  @default(false)
+  semester  Int      @default(1)
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
