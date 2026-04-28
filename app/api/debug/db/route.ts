@@ -13,11 +13,11 @@ export async function GET() {
       ssl: { rejectUnauthorized: false }
     });
     
-    const [columns] = await pool.query('DESCRIBE etablissements');
+    const [columns] = await pool.query('DESCRIBE demandes_demo');
     await pool.end();
 
     return NextResponse.json({ 
-      status: "Analyse de la table etablissements", 
+      status: "Analyse de la table demandes_demo", 
       columns: columns 
     });
   } catch (error: any) {
