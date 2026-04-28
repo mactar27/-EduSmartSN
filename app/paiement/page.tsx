@@ -34,7 +34,7 @@ export default function CheckoutPage() {
       if (data.redirect_url) {
         window.location.href = data.redirect_url
       } else {
-        alert("Erreur lors de l'initialisation du paiement.")
+        alert("Erreur PayTech : " + (data.details || data.error || "Problème d'initialisation"))
       }
     } catch (err) {
       console.error(err)
