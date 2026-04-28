@@ -6,11 +6,13 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     // Debug temporaire pour voir les colonnes
-    const [cols]: any = await query('DESCRIBE users');
-    console.log('Columns in users:', cols);
+    const cols: any = await query('DESCRIBE users');
     
     // Tentative avec le nom probable 'mot_de_passe' ou similar
-    const passwordField = cols.find((c: any) => c.Field.includes('pass') || c.Field.includes('mot')).Field;
+    const passwordField = cols.find((c: any) => 
+      c.Field.toLowerCase().includes('pass') || 
+      c.Field.toLowerCase().includes('mot')
+    ).Field;
     
     const users = await query<any[]>(`SELECT * FROM users WHERE email = ? AND ${passwordField} = ?`, [email, password]);
 
