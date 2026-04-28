@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  // url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  UNIV_ADMIN
+  PROFESSOR
+  STUDENT
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Tenant {
+  id             String       @id @default(cuid())
+  name           String
+  domain         String?      @unique
+  subdomain      String       @unique
+  logoUrl        String?
+  primaryColor   String?      @default("#1e40af") // Sovereign Blue
+  secondaryColor String?      @default("#10b981") // Emerald Green
+  status         TenantStatus @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  users         User[]
+  faculties     Faculty[]
+  academicYears AcademicYear[]
+  payments      Payment[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      UserRole @default(STUDENT)
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentProfile   Student?
+  professorProfile Professor?
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  studentId String   @unique // e.g., UAM-2024-001
+  name      String?
+  photoUrl  String?
+  department String?
+  birthDate DateTime?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  enrollments Enrollment[]
+}
+
+model Professor {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id])
+  specialization String?
+  tenantId       String
+}
+
+model Faculty {
+  id       String @id @default(cuid())
+  name     String
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  departments Department[]
+}
+
+model Department {
+  id        String  @id @default(cuid())
+  name      String
+  facultyId String
+  faculty   Faculty @relation(fields: [facultyId], references: [id])
+}
+
+model AcademicYear {
+  id       String   @id @default(cuid())
+  name     String // e.g., 2024-2025
+  tenantId String
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  start    DateTime
+  end      DateTime
+  current  Boolean  @default(false)
+
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id             String       @id @default(cuid())
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id])
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  status         String       @default("ENROLLED")
+  createdAt      DateTime     @default(now())
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  tenantId      String
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  studentId     String
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  method        String // WAVE, ORANGE_MONEY
+  transactionId String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model DemoRequest {
+  id                String   @id @default(cuid())
+  etablissementName String
+  contactName       String
+  email             String
+  phone             String
+  message           String?  @db.Text
+  createdAt         DateTime @default(now())
+}
+
+
