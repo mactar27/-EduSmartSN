@@ -29,9 +29,7 @@ export const db = globalForMysql.mysql ?? (() => {
   return mysql.createPool(poolConfig as any);
 })();
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForMysql.mysql = db;
-}
+globalForMysql.mysql = db;
 
 export async function query<T>(sql: string, params?: unknown[]): Promise<T> {
   try {

@@ -14,7 +14,16 @@ export async function GET(request: NextRequest) {
     if (!targetTenantId) {
       const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
       if (tenants.length === 0) {
-        return NextResponse.json({ error: 'No tenant found' }, { status: 404 });
+        // Retourner un état initial plutôt qu'une erreur 404
+        return NextResponse.json({
+          tenant: { name: "EduSmart SN" },
+          stats: {
+            students: 0,
+            enrollmentRate: "0%",
+            totalRevenue: 0,
+            paymentsByMethod: []
+          }
+        });
       }
       targetTenantId = tenants[0].id;
     }
