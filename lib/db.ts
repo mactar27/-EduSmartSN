@@ -14,11 +14,25 @@ const poolConfig = process.env.DATABASE_URL
       database: 'edusmart',
     };
 
-export const db = globalForMysql.mysql ?? (
-  process.env.DATABASE_URL 
-    ? mysql.createPool(`${process.env.DATABASE_URL}${process.env.DATABASE_URL.includes('?') ? '&' : '?'}ssl={"rejectUnauthorized":false}`)
-    : mysql.createPool(poolConfig as any)
-);
+export const db = globalForMysql.mysql ?? (() => {
+  if (process.env.DATABASE_URL) {
+    const url = new URL(process.env.DATABASE_URL);
+    return mysql.createPool({
+      host: url.hostname,
+      port: parseInt(url.port) || 3306,
+      user: url.username,
+      password: url.password,
+      database: url.pathname.substring(1),
+      ssl: {
+        rejectUnauthorized: false
+      },
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+  }
+  return mysql.createPool(poolConfig as any);
+})();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForMysql.mysql = db;
