@@ -17,16 +17,25 @@ export async function POST(request: NextRequest) {
     let successCount = 0;
     for (const student of students) {
       try {
-        // Séparer le nom complet
-        const nameParts = student.name.split(' ');
-        const prenom = nameParts.slice(0, -1).join(' ') || 'Prénom';
-        const nom = nameParts.slice(-1)[0] || student.name;
+        const matricule = student.studentId || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`;
+        const email = student.email || `${matricule.toLowerCase()}@edusmart.sn`;
 
-        await query(
-          `INSERT INTO etudiants (prenom, nom, email, matricule, filiere, etablissement_id, statut, created_at, updated_at) 
-           VALUES (?, ?, ?, ?, ?, ?, 'actif', NOW(), NOW())`,
-          [prenom, nom, student.email || '', student.studentId || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`, student.department || 'Général', tenantId]
+        // 1. Créer l'utilisateur d'abord
+        const userResult = await query<any>(
+          `INSERT INTO users (name, email, role, password, created_at, updated_at) 
+           VALUES (?, ?, 'student', 'pass123', NOW(), NOW())`,
+          [student.name, email]
         );
+
+        const userId = userResult.insertId;
+
+        // 2. Créer le profil élève lié
+        await query(
+          `INSERT INTO etudiants (user_id, matricule, filiere, etablissement_id, statut, created_at, updated_at) 
+           VALUES (?, ?, ?, ?, 'actif', NOW(), NOW())`,
+          [userId, matricule, student.department || 'Général', tenantId]
+        );
+        
         successCount++;
       } catch (err) {
         console.error(`Failed to insert student ${student.name}:`, err);

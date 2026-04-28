@@ -3,22 +3,36 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // Test de connexion réussi ! On affiche les colonnes proprement.
-    const columns = await query<any[]>('SHOW COLUMNS FROM etudiants');
-    const names = columns.map(c => c.Field).join(', ');
-    
+    const searchParams = request.nextUrl.searchParams;
+    const tenantId = searchParams.get('tenantId');
+
+    let targetTenantId = tenantId;
+    if (!targetTenantId) {
+      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
+      targetTenantId = tenants[0]?.id;
+    }
+
+    // Requête avec jointure pour récupérer le nom depuis la table users
+    const students = await query<any[]>(`
+      SELECT 
+        e.id, 
+        u.name, 
+        u.email, 
+        e.matricule as studentId, 
+        e.filiere as department, 
+        e.statut 
+      FROM etudiants e
+      JOIN users u ON e.user_id = u.id
+      WHERE e.etablissement_id = ?
+      ORDER BY e.id DESC
+    `, [targetTenantId]);
+
     return NextResponse.json({ 
-      data: [
-        { 
-          id: 1, 
-          name: "STRUCTURE_DE_LA_BASE", 
-          studentId: "COLONNES", 
-          department: names,
-          statut: "actif"
-        }
-      ]
+      data: students || [],
+      count: students?.length || 0
     });
   } catch (error: any) {
+    console.error("Fetch Error:", error);
     return NextResponse.json({ 
       error: 'SQL_ERROR', 
       message: error.message 
