@@ -3,20 +3,14 @@ import { query } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // On essaie de récupérer un seul élève pour voir les colonnes
-    const sample = await query<any[]>('SELECT * FROM etudiants LIMIT 1');
+    // Test de connexion simple
+    const columns = await query<any[]>('SHOW COLUMNS FROM etudiants');
+    const names = columns.map(c => c.Field).join(' | ');
     
-    if (sample.length > 0) {
-      return NextResponse.json({ 
-        error: 'DIAGNOSTIC_MODE',
-        columnNames: Object.keys(sample[0])
-      });
-    } else {
-      return NextResponse.json({ 
-        error: 'TABLE_EMPTY',
-        message: 'La table est vide, je ne peux pas voir les colonnes'
-      });
-    }
+    return NextResponse.json({ 
+      diagnostic: "LISTE_COLONNES",
+      data: names 
+    });
   } catch (error: any) {
     return NextResponse.json({ 
       error: 'SQL_ERROR', 
