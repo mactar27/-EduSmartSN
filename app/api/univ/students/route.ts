@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
     }
 
     const students = await query<any[]>(
-      'SELECT * FROM etudiants WHERE etablissement_id = ?',
-      [targetTenantId]
+      'SELECT * FROM etudiants',
+      []
     );
 
     // Debug: Compter le nombre total d'élèves dans la base pour voir s'ils existent
