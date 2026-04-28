@@ -31,7 +31,8 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (res.ok) {
-        if (data.user.role === 'SUPER_ADMIN') {
+        const userRole = data.user.role?.toUpperCase();
+        if (userRole === 'SUPER_ADMIN') {
           router.push('/admin/dashboard')
         } else {
           router.push('/univ/dashboard')
