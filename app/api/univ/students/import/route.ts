@@ -4,22 +4,37 @@ import { query } from '@/lib/db';
 export async function POST(request: NextRequest) {
   try {
     const { students } = await request.json();
+    console.log(`Starting import of ${students?.length} students`);
     
-    // Pour l'instant, on prend le premier établissement actif comme tenant
+    // On récupère l'établissement actif
     const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 LIMIT 1');
+    if (!tenants || tenants.length === 0) {
+      return NextResponse.json({ error: 'Aucun établissement actif trouvé' }, { status: 404 });
+    }
     const tenantId = tenants[0].id;
+    console.log(`Targeting tenant ID: ${tenantId}`);
 
+    let successCount = 0;
     for (const student of students) {
-      await query(
-        `INSERT INTO etudiants (name, email, student_id, department, etablissement_id, statut, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, ?, 'actif', NOW(), NOW())`,
-        [student.name, student.email || '', student.studentId, student.department, tenantId]
-      );
+      try {
+        await query(
+          `INSERT INTO etudiants (name, email, student_id, department, etablissement_id, statut, created_at, updated_at) 
+           VALUES (?, ?, ?, ?, ?, 'actif', NOW(), NOW())`,
+          [student.name, student.email || '', student.studentId || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`, student.department || 'Général', tenantId]
+        );
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to insert student ${student.name}:`, err);
+      }
     }
 
-    return NextResponse.json({ message: `${students.length} élèves importés` });
+    console.log(`Import finished: ${successCount} successes`);
+    return NextResponse.json({ 
+      message: `${successCount} élèves importés avec succès`,
+      count: successCount 
+    });
   } catch (error: any) {
-    console.error('Import error:', error);
-    return NextResponse.json({ error: 'Erreur lors de l\'importation' }, { status: 500 });
+    console.error('Critical Import error:', error);
+    return NextResponse.json({ error: 'Erreur lors de l\'importation', details: error.message }, { status: 500 });
   }
 }
