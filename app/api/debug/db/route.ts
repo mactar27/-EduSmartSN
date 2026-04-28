@@ -13,12 +13,12 @@ export async function GET() {
       ssl: { rejectUnauthorized: false }
     });
     
-    const [tables] = await pool.query('SHOW TABLES');
+    const [columns] = await pool.query('DESCRIBE etablissements');
     await pool.end();
 
     return NextResponse.json({ 
-      status: "Connexion OK", 
-      tables: tables 
+      status: "Analyse de la table etablissements", 
+      columns: columns 
     });
   } catch (error: any) {
     return NextResponse.json({ 
