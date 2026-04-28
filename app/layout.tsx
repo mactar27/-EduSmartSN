@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { CookieConsent } from "@/components/cookie-consent"
+import { SplashScreen } from "@/components/splash-screen"
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -31,6 +32,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="EduSmart" />
       </head>
       <body className="font-sans antialiased">
+        <SplashScreen />
         {children}
         <CookieConsent />
         {process.env.NODE_ENV === 'production' && <Analytics />}
