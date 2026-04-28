@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // GET all fees for the current tenant
 export async function GET(request: NextRequest) {
   try {
+    // Safety check for build time
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json({ fees: [] });
+    }
     const tenantId = request.headers.get('x-tenant-id');
     if (!tenantId) return NextResponse.json({ error: 'Tenant non identifié' }, { status: 400 });
 
