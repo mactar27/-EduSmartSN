@@ -141,7 +141,7 @@ export default function StudentListPage() {
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-muted border-2 border-primary/20">
                     <Image 
-                      src={student.photoUrl || "https://ui-avatars.com/api/?name=" + (student.name || "E")} 
+                      src={student.photoUrl || student.photo_url || "https://ui-avatars.com/api/?name=" + (student.name || "E")} 
                       alt={student.name}
                       fill
                       className="object-cover"
@@ -149,7 +149,7 @@ export default function StudentListPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-lg truncate">{student.name || "Sans Nom"}</h3>
-                    <p className="text-xs text-primary font-bold uppercase tracking-widest">{student.studentId}</p>
+                    <p className="text-xs text-primary font-bold uppercase tracking-widest">{student.studentId || student.student_id}</p>
                   </div>
                   <button className="p-2 hover:bg-muted rounded-lg transition-colors">
                     <MoreVertical size={20} className="text-muted-foreground" />
