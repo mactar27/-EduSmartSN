@@ -118,17 +118,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1">
             <Link href="/admin/dashboard" className="w-full">
               <Button variant="outline" className="w-full h-24 flex flex-col gap-2 rounded-xl border-border hover:border-primary hover:text-primary transition-all">
                 <ShieldCheck size={24} />
                 <span className="text-xs font-bold uppercase">Super Admin</span>
-              </Button>
-            </Link>
-            <Link href="/univ/dashboard" className="w-full">
-              <Button variant="outline" className="w-full h-24 flex flex-col gap-2 rounded-xl border-border hover:border-emerald-600 hover:text-emerald-600 transition-all">
-                <School size={24} />
-                <span className="text-xs font-bold uppercase">Portail Univ</span>
               </Button>
             </Link>
           </div>
