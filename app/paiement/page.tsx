@@ -103,8 +103,8 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex justify-center items-center gap-6 opacity-80 hover:opacity-100 transition-all bg-white p-4 rounded-2xl border border-border shadow-sm">
-            <img src="https://logodownload.org/wp-content/uploads/2021/03/wave-logo-1.png" alt="Wave" className="h-6 w-auto object-contain" />
-            <img src="https://logos-world.net/wp-content/uploads/2020/11/Orange-Logo.png" alt="Orange Money" className="h-8 w-auto object-contain" />
+            <img src="/wave.png" alt="Wave" className="h-8 w-auto object-contain" />
+            <img src="/orange.png" alt="Orange Money" className="h-8 w-auto object-contain" />
             <img src="https://logos-world.net/wp-content/uploads/2020/05/Visa-Logo.png" alt="Visa" className="h-4 w-auto object-contain" />
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="Mastercard" className="h-8 w-auto object-contain" />
           </div>
