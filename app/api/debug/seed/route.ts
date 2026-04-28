@@ -5,11 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const [cols]: any = await query("SHOW COLUMNS FROM users LIKE 'role'");
+    const cols: any = await query("DESCRIBE users");
     
     return NextResponse.json({ 
-      status: "Détails colonne role", 
-      type: cols[0].Type
+      status: "Structure complète", 
+      columns: cols.map((c: any) => ({ name: c.Field, type: c.Type }))
     });
   } catch (error: any) {
     return NextResponse.json({ 
