@@ -24,9 +24,16 @@ export async function GET(request: NextRequest) {
       [targetTenantId]
     );
 
+    // Debug: Compter le nombre total d'élèves dans la base pour voir s'ils existent
+    const totalInDb = await query<any[]>('SELECT COUNT(*) as count FROM etudiants');
+
     return NextResponse.json({ 
       data: students,
-      debug: { tenantId: targetTenantId }
+      debug: { 
+        targetTenantId,
+        totalInDb: totalInDb[0]?.count,
+        countForThisTenant: students.length
+      }
     });
   } catch (error: any) {
     return NextResponse.json({ 
