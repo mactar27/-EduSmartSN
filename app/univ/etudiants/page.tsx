@@ -28,7 +28,14 @@ export default function StudentListPage() {
     try {
       const res = await fetch('/api/univ/students')
       const data = await res.json()
-      setStudents(data.data || [])
+      console.log("Raw data:", data)
+      if (data.data) {
+        // alert("API OK: " + data.data.length + " élèves trouvés");
+        setStudents(data.data)
+      } else {
+        // alert("API VIDE ou ERREUR: " + JSON.stringify(data));
+        setStudents([])
+      }
     } catch (error) {
       console.error("Failed to fetch students:", error)
     } finally {
