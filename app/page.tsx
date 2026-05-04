@@ -15,7 +15,6 @@ export default function Home() {
       <FeaturesSection />
       <ModulesSection />
       <UsersSection />
-      <EtablissementsSection />
       <CTASection />
       <Footer />
     </main>
