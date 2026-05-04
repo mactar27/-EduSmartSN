@@ -24,40 +24,37 @@ export async function GET(request: NextRequest) {
     // Requête avec jointure pour récupérer le nom depuis la table users
     const subjectCode = searchParams.get('subjectId') || 'INF1011';
 
-    // On cherche dans les deux tables possibles pour être sûr de rien rater
-    let students = await query<any[]>(`SELECT id, matricule as studentId, filiere as department, statut FROM etudiants ORDER BY id DESC`);
-    
-    if (!students || students.length === 0) {
-      console.log("Table 'etudiants' vide, essai sur 'Student'...");
-      students = await query<any[]>(`SELECT id, matricule as studentId, department, status as statut FROM Student ORDER BY id DESC`);
+    // Résilience maximale : on prend TOUT sans nommer de colonnes précises
+    let rawData: any[] = [];
+    try {
+      rawData = await query<any[]>(`SELECT * FROM etudiants ORDER BY id DESC LIMIT 100`);
+    } catch (e) {
+      try {
+        rawData = await query<any[]>(`SELECT * FROM Student ORDER BY id DESC LIMIT 100`);
+      } catch (e2) {
+        return NextResponse.json({ error: "ALL_TABLES_FAILED", details: e2.message }, { status: 500 });
+      }
     }
 
-    const formattedStudents = students.map(s => ({
-      ...s,
-      name: s.name || ("Élève #" + s.id),
-      email: s.email || "email@non.disponible"
+    const formattedStudents = (rawData || []).map(s => ({
+      id: s.id,
+      name: s.name || (s.prenom ? `${s.prenom} ${s.nom}` : s.nom) || ("Élève #" + s.id),
+      email: s.email || "---",
+      studentId: s.matricule || s.studentId || "---",
+      department: s.filiere || s.department || "---",
+      statut: s.statut || s.status || "actif"
     }));
 
     return NextResponse.json({ 
-      data: formattedStudents || [],
-      count: formattedStudents?.length || 0
+      data: formattedStudents,
+      count: formattedStudents.length
     });
-    
   } catch (error: any) {
     console.error("Fetch Error:", error);
-    // Deuxième essai sur l'autre table en cas d'erreur SQL (ex: table manquante)
-    try {
-       const students = await query<any[]>(`SELECT id, matricule as studentId, department, status as statut FROM Student ORDER BY id DESC`);
-       return NextResponse.json({ 
-         data: students.map(s => ({ ...s, name: "Élève #" + s.id })), 
-         count: students.length 
-       });
-    } catch (e) {
-       return NextResponse.json({ 
-         error: 'SQL_ERROR', 
-         message: error.message 
-       }, { status: 500 });
-    }
+    return NextResponse.json({ 
+      error: 'CRITICAL_ERROR', 
+      message: error.message 
+    }, { status: 500 });
   }
 }
 
