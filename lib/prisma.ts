@@ -36,7 +36,7 @@ const getPoolConfig = () => {
   };
 };
 
-const pool = mariadb.createPool(getPoolConfig());
+const pool = mariadb.createPool(getPoolConfig() as any);
 // PrismaMariaDb expects a different Pool interface version, but it works at runtime
 const adapter = new PrismaMariaDb(pool as any);
 
