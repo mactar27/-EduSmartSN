@@ -34,7 +34,9 @@ export function AdminHeader() {
 
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold">27 Avril 2026</p>
+            <p className="text-sm font-semibold">
+              {new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}
+            </p>
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Dakar, Sénégal</p>
           </div>
         </div>
