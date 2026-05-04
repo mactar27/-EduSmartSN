@@ -38,16 +38,13 @@ export function HeroSection() {
           {/* Badge */}
 
           {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-4 sm:mb-6 text-balance">
-            La plateforme de gestion universitaire{" "}
-            <span className="text-primary">moderne</span> du{" "}
-            <span className="text-secondary">Sénégal</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-4 sm:mb-6 text-balance">
+            L&apos;excellence académique <span className="text-primary">commence ici</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto text-pretty px-2 sm:px-0">
-            Gérez vos étudiants, professeurs, paiements et cours depuis une seule plateforme. 
-            Solution SaaS multi-tenant conçue pour les universités et écoles supérieures africaines.
+          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto text-pretty px-2 sm:px-0">
+            Pilotez votre établissement avec la plateforme de gestion <span className="text-foreground font-semibold italic">numérique souveraine</span> de référence au Sénégal.
           </p>
 
           {/* CTA Buttons */}
