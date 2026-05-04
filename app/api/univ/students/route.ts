@@ -26,12 +26,15 @@ export async function GET(request: NextRequest) {
 
     const students = await query<any[]>(`
       SELECT 
-        id, 
-        matricule as studentId, 
-        filiere as department, 
-        statut
-      FROM etudiants
-      ORDER BY id DESC
+        e.id, 
+        COALESCE(u.name, 'Élève Importé') as name, 
+        u.email, 
+        e.matricule as studentId, 
+        e.filiere as department, 
+        e.statut
+      FROM etudiants e
+      LEFT JOIN users u ON e.user_id = u.id
+      ORDER BY e.id DESC
     `);
 
     return NextResponse.json({ 
