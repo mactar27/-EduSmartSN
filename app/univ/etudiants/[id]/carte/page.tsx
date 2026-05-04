@@ -34,7 +34,7 @@ export default function StudentCardPage() {
   if (isLoading) return <div className="p-20 text-center">Génération de la carte...</div>
   if (!student) return <div className="p-20 text-center text-red-500">Élève non trouvé.</div>
 
-  const publicProfileUrl = `https://edusmart-sn.vercel.app/verify/${student.studentId}`
+  const publicProfileUrl = `https://edusmartsn.vercel.app/verify/${student.studentId}`
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in zoom-in duration-500 pb-20">
