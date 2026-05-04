@@ -73,7 +73,7 @@ model Student {
   user      User     @relation(fields: [userId], references: [id])
   studentId String   @unique // e.g., UAM-2024-001
   name      String?
-  photoUrl  String?
+  photoUrl  String?  @db.LongText
   department String?
   birthDate DateTime?
   tenantId  String

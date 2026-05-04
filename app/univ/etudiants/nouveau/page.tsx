@@ -62,10 +62,17 @@ export default function NewStudentPage() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  // Pour l'aperçu immédiat
                   const url = URL.createObjectURL(file);
                   setPhotoPreview(url);
-                  // Dans un vrai projet, on uploaderait sur S3/Cloudinary ici
-                  setFormData({...formData, photoUrl: url}); 
+                  
+                  // Conversion en Base64 pour stocker directement dans la base de données
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64String = reader.result as string;
+                    setFormData({...formData, photoUrl: base64String}); 
+                  };
+                  reader.readAsDataURL(file);
                 }
               }}
             />
