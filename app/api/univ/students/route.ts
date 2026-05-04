@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, studentId, department, photoUrl } = body;
+    const { name, email, department, photoUrl } = body;
 
     const tenant = await prisma.tenant.findFirst({
       where: { status: 'ACTIVE' },
@@ -66,7 +66,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No active tenant found' }, { status: 404 });
     }
 
-    const finalEmail = email || `${studentId.toLowerCase()}@wockytech.xyz`;
+    // Génération automatique du matricule
+    const schoolInitials = tenant.name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 3);
+    const year = new Date().getFullYear();
+    const randomSuffix = Math.random().toString(36).slice(-4).toUpperCase();
+    const generatedStudentId = `${schoolInitials}-${year}-${randomSuffix}`;
+
+    const finalEmail = email || `${generatedStudentId.toLowerCase()}@wockytech.xyz`;
     const tempPassword = 'password123';
 
     const user = await prisma.user.create({
@@ -78,7 +89,7 @@ export async function POST(request: NextRequest) {
         tenantId: tenant.id,
         studentProfile: {
           create: {
-            studentId,
+            studentId: generatedStudentId,
             name,
             department,
             photoUrl,

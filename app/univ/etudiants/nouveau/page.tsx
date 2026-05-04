@@ -103,16 +103,6 @@ export default function NewStudentPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold">Numéro de Matricule</label>
-            <Input 
-              value={formData.studentId}
-              onChange={(e) => setFormData({...formData, studentId: e.target.value})}
-              placeholder="Ex: UAM-2024-123" 
-              required 
-              className="rounded-xl h-12 bg-muted/30"
-            />
-          </div>
-          <div className="space-y-2">
             <label className="text-sm font-bold">Département / Faculté</label>
             <Input 
               value={formData.department}
