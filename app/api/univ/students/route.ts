@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
     let targetTenantId = tenantId;
     if (!targetTenantId) {
       const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
-      targetTenantId = tenants[0]?.id;
+      if (!tenants || tenants.length === 0) {
+        console.warn("No active establishment found for student fetch");
+        return NextResponse.json({ data: [], count: 0, warning: "NO_ACTIVE_TENANT" });
+      }
+      targetTenantId = tenants[0].id;
     }
 
     // Requête avec jointure pour récupérer le nom depuis la table users
