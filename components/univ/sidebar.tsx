@@ -60,10 +60,13 @@ export function UnivSidebar() {
         <div className="flex flex-col h-full p-6">
           <div className="flex items-center gap-3 mb-12 px-2">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-bold text-xl">E</div>
-                <span className="text-xl font-bold tracking-tight">EduSmart <span className="text-emerald-400">SN</span></span>
-              </div>
+              <Image
+                src="/edusmart_transparent.png"
+                alt="EduSmart SN"
+                width={180}
+                height={50}
+                className="h-12 w-auto brightness-0 invert"
+              />
             </Link>
           </div>
 
