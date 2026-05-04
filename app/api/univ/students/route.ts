@@ -31,9 +31,8 @@ export async function GET(request: NextRequest) {
         filiere as department, 
         statut
       FROM etudiants
-      WHERE etablissement_id = ?
       ORDER BY id DESC
-    `, [targetTenantId]);
+    `);
 
     return NextResponse.json({ 
       data: students || [],
