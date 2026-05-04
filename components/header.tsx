@@ -8,10 +8,10 @@ import { Menu, X, Search } from "lucide-react"
 
 const navLinks = [
   { href: "/", label: "Accueil", active: true },
-  { href: "/cours", label: "Cours" },
-  { href: "/ressources", label: "Ressources" },
-  { href: "/a-propos", label: "À propos" },
-  { href: "/contact", label: "Contact" },
+  { href: "#modules", label: "Cours" },
+  { href: "#utilisateurs", label: "Ressources" },
+  { href: "#fonctionnalites", label: "À propos" },
+  { href: "#contact", label: "Contact" },
 ]
 
 export function Header() {
