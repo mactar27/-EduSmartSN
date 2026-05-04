@@ -4,92 +4,120 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Search } from "lucide-react"
 
 const navLinks = [
-  { href: "#fonctionnalites", label: "Fonctionnalités" },
-  { href: "#modules", label: "Modules" },
-  { href: "#utilisateurs", label: "Utilisateurs" },
-  { href: "#contact", label: "Contact" },
+  { href: "/", label: "Accueil", active: true },
+  { href: "/cours", label: "Cours" },
+  { href: "/ressources", label: "Ressources" },
+  { href: "/a-propos", label: "À propos" },
+  { href: "/contact", label: "Contact" },
 ]
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="EduSmart SN Logo"
-            width={140}
-            height={50}
-            className="h-12 w-auto"
-          />
+    <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/95 backdrop-blur-md">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4">
+        {/* Logo Section */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="EduSmart Logo"
+              width={48}
+              height={48}
+              className="object-contain"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-2xl font-black tracking-tighter text-[#064e3b] leading-none uppercase">
+              EDUSMART
+            </span>
+            <span className="text-[10px] font-bold tracking-[0.3em] text-[#10b981] uppercase leading-none mt-1">
+              Smarter Education
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+              className={`text-[15px] font-bold transition-all relative py-2 group ${
+                link.active ? "text-[#064e3b]" : "text-slate-600 hover:text-[#064e3b]"
+              }`}
             >
               {link.label}
+              <span className={`absolute bottom-0 left-0 h-0.5 bg-[#10b981] transition-all duration-300 ${
+                link.active ? "w-full" : "w-0 group-hover:w-full"
+              }`} />
             </Link>
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="ghost" className="text-muted-foreground hover:text-primary">
-              Se connecter
-            </Button>
-          </Link>
-          <Link href="#demo">
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              Démo Gratuite
-            </Button>
-          </Link>
+        {/* Action Buttons */}
+        <div className="hidden md:flex items-center gap-6">
+          <button className="text-slate-500 hover:text-[#064e3b] transition-colors">
+            <Search size={22} />
+          </button>
+          
+          <div className="flex items-center gap-3">
+            <Link href="/login">
+              <Button className="bg-[#06110d] text-white hover:bg-[#0c2018] h-11 px-8 rounded-full font-bold text-sm shadow-lg shadow-black/5">
+                Se connecter
+              </Button>
+            </Link>
+            <Link href="#demo-form">
+              <Button className="bg-[#059669] text-white hover:bg-[#047857] h-11 px-8 rounded-full font-bold text-sm shadow-lg shadow-emerald-500/10">
+                S&apos;inscrire
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2"
+          className="lg:hidden p-2 text-[#064e3b]"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
           {mobileMenuOpen ? (
-            <X className="h-6 w-6 text-foreground" />
+            <X className="h-7 w-7" />
           ) : (
-            <Menu className="h-6 w-6 text-foreground" />
+            <Menu className="h-7 w-7" />
           )}
         </button>
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background">
-          <nav className="flex flex-col p-4 gap-4">
+        <div className="lg:hidden border-t border-slate-100 bg-white animate-in slide-in-from-top-4 duration-300">
+          <nav className="flex flex-col p-6 gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+                className="text-lg font-bold text-slate-700 hover:text-[#10b981] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="flex flex-col gap-2 pt-4 border-t border-border">
-              <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
-                Se connecter
-              </Button>
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                Demander une démo
-              </Button>
+            <div className="flex flex-col gap-3 pt-6 border-t border-slate-100">
+              <Link href="/login" className="w-full">
+                <Button className="w-full bg-[#06110d] text-white h-12 rounded-xl font-bold">
+                  Se connecter
+                </Button>
+              </Link>
+              <Link href="#demo-form" className="w-full">
+                <Button className="w-full bg-[#059669] text-white h-12 rounded-xl font-bold">
+                  S&apos;inscrire
+                </Button>
+              </Link>
             </div>
           </nav>
         </div>
