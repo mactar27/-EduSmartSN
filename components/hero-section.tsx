@@ -81,13 +81,6 @@ export function HeroSection() {
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
-              
-              <button className="flex items-center gap-3 text-emerald-100/60 hover:text-white transition-colors group">
-                <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 transition-all group-hover:scale-110">
-                  <Play className="h-4 w-4 fill-current ml-1" />
-                </div>
-                <span className="font-bold text-sm tracking-wide">Voir la vidéo</span>
-              </button>
             </div>
           </div>
 
