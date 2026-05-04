@@ -24,27 +24,35 @@ export async function GET(request: NextRequest) {
     // Requête avec jointure pour récupérer le nom depuis la table users
     const subjectCode = searchParams.get('subjectId') || 'INF1011';
 
-    // URGENCE : On n'utilise PLUS la table users pour l'instant car elle cause le 500
-    const students = await query<any[]>(`
-      SELECT 
-        id, 
-        matricule as studentId, 
-        filiere as department, 
-        statut
-      FROM etudiants
-      ORDER BY id DESC
-    `);
+    // On cherche dans les deux tables possibles pour être sûr de rien rater
+    let students = await query<any[]>(`SELECT id, matricule as studentId, filiere as department, statut FROM etudiants ORDER BY id DESC`);
+    
+    if (!students || students.length === 0) {
+      console.log("Table 'etudiants' vide, essai sur 'Student'...");
+      students = await query<any[]>(`SELECT id, matricule as studentId, department, status as statut FROM Student ORDER BY id DESC`);
+    }
 
     const formattedStudents = students.map(s => ({
       ...s,
-      name: "Élève #" + s.id, // Nom temporaire
-      email: "email@non.disponible"
+      name: s.name || ("Élève #" + s.id),
+      email: s.email || "email@non.disponible"
     }));
 
     return NextResponse.json({ 
       data: formattedStudents || [],
       count: formattedStudents?.length || 0
     });
+    
+  } catch (error: any) {
+    console.error("Fetch Error:", error);
+    // Deuxième essai si la première table n'existe pas
+    try {
+       const students = await query<any[]>(`SELECT id, matricule as studentId, department, status as statut FROM Student ORDER BY id DESC`);
+       return NextResponse.json({ data: students, count: students.length });
+    } catch (e) {
+       return NextResponse.json({ error: 'SQL_ERROR', message: error.message }, { status: 500 });
+    }
+  }
   } catch (error: any) {
     console.error("Fetch Error:", error);
     return NextResponse.json({ 
