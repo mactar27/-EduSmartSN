@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowRight, CheckCircle, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { toast } from "sonner"
 
 export function DemoForm() {
   const [formData, setFormData] = useState({
