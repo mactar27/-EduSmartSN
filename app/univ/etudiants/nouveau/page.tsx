@@ -11,11 +11,13 @@ export default function NewStudentPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     studentId: "",
     department: "",
     photoUrl: "",
     birthDate: ""
   })
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,16 +54,30 @@ export default function NewStudentPage() {
 
       <form onSubmit={handleSubmit} className="bg-card border border-border rounded-3xl p-8 shadow-xl space-y-6">
         <div className="flex justify-center mb-8">
-          <div className="relative w-32 h-32 bg-muted rounded-full flex items-center justify-center border-4 border-dashed border-border group hover:border-primary transition-colors cursor-pointer overflow-hidden">
-            {formData.photoUrl ? (
-              <img src={formData.photoUrl} className="w-full h-full object-cover" />
+          <label className="relative w-32 h-32 bg-muted rounded-full flex items-center justify-center border-4 border-dashed border-border group hover:border-primary transition-colors cursor-pointer overflow-hidden">
+            <input 
+              type="file" 
+              className="hidden" 
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setPhotoPreview(url);
+                  // Dans un vrai projet, on uploaderait sur S3/Cloudinary ici
+                  setFormData({...formData, photoUrl: url}); 
+                }
+              }}
+            />
+            {photoPreview || formData.photoUrl ? (
+              <img src={photoPreview || formData.photoUrl} className="w-full h-full object-cover" />
             ) : (
               <UserCircle size={64} className="text-muted-foreground group-hover:text-primary transition-colors" />
             )}
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-white text-xs font-bold">Ajouter Photo</span>
+              <span className="text-white text-xs font-bold">Importer Photo</span>
             </div>
-          </div>
+          </label>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -71,6 +87,17 @@ export default function NewStudentPage() {
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               placeholder="Ex: Mactar Ndiaye" 
+              required 
+              className="rounded-xl h-12 bg-muted/30"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Adresse Email</label>
+            <Input 
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              placeholder="Ex: etudiant@edusmart.sn" 
               required 
               className="rounded-xl h-12 bg-muted/30"
             />
@@ -91,15 +118,6 @@ export default function NewStudentPage() {
               value={formData.department}
               onChange={(e) => setFormData({...formData, department: e.target.value})}
               placeholder="Ex: Informatique" 
-              className="rounded-xl h-12 bg-muted/30"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-bold">URL de la Photo</label>
-            <Input 
-              value={formData.photoUrl}
-              onChange={(e) => setFormData({...formData, photoUrl: e.target.value})}
-              placeholder="Lien vers une image" 
               className="rounded-xl h-12 bg-muted/30"
             />
           </div>
