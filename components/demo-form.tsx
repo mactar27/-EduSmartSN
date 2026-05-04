@@ -170,8 +170,11 @@ export function DemoForm() {
         )}
       </Button>
 
-      <p className="text-xs text-center text-muted-foreground">
-        En soumettant ce formulaire, vous acceptez notre politique de confidentialité.
+      <p className="text-center text-sm text-muted-foreground mt-4 px-4">
+        En soumettant ce formulaire, vous acceptez notre{" "}
+        <Link href="/privacy" className="text-primary font-bold hover:underline">
+          politique de confidentialité
+        </Link>.
       </p>
     </form>
   )
