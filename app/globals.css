@@ -168,4 +168,11 @@
   @keyframes shimmer {
     100% { transform: translateX(100%); }
   }
+  .bg-grid {
+    background-image: radial-gradient(circle at center, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bg-glow {
+    background: radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.05), transparent 70%);
+  }
 }
