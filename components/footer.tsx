@@ -5,19 +5,19 @@ const footerLinks = {
   produit: [
     { label: "Fonctionnalités", href: "#fonctionnalites" },
     { label: "Modules", href: "#modules" },
-    { label: "Tarifs", href: "#" },
-    { label: "Démo", href: "#" },
+    { label: "Tarifs", href: "#modules" }, // Rediriger vers modules pour l'instant
+    { label: "Démo", href: "#contact" },
   ],
   entreprise: [
-    { label: "À propos", href: "#" },
+    { label: "À propos", href: "#fonctionnalites" },
     { label: "Blog", href: "#" },
     { label: "Carrières", href: "#" },
     { label: "Contact", href: "#contact" },
   ],
   legal: [
-    { label: "Confidentialité", href: "#" },
-    { label: "CGU", href: "#" },
-    { label: "Mentions légales", href: "#" },
+    { label: "Confidentialité", href: "/privacy" },
+    { label: "CGU", href: "/terms" },
+    { label: "Mentions légales", href: "/mentions-legales" },
   ],
 }
 
