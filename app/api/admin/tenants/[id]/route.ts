@@ -3,9 +3,10 @@ import { query } from '@/lib/db';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const { id } = params;
     const body = await request.json();
     const { name, subdomain, primaryColor, status } = body;
@@ -24,9 +25,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const { id } = params;
     await query('DELETE FROM Tenant WHERE id = ?', [id]);
     return NextResponse.json({ message: 'Tenant deleted successfully' });
