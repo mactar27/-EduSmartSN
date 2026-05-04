@@ -15,8 +15,8 @@ const modules = [
   {
     id: "finance",
     icon: Wallet,
-    title: "Module Financier",
-    description: "Gestion complète des paiements avec intégration Wave, Orange Money et Free Money.",
+    title: "Gestion Financière",
+    description: "Suivez les paiements de scolarité, gérez les impayés et générez des reçus administratifs.",
     color: "primary",
   },
   {

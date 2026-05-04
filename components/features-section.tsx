@@ -24,8 +24,8 @@ const features = [
   },
   {
     icon: Smartphone,
-    title: "Paiements Mobiles",
-    description: "Intégration native Wave, Orange Money et Free Money.",
+    title: "Suivi Simplifié",
+    description: "Accès facile aux informations pour les parents et étudiants.",
     color: "text-accent",
     bg: "bg-accent/10",
   },
