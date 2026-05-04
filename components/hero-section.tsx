@@ -1,13 +1,30 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Play } from "lucide-react"
-import useSWR from "swr"
 import Link from "next/link"
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
 export function HeroSection() {
+  const [stats, setStats] = useState({ students: 0, success: 0, progress: 0 })
+
+  useEffect(() => {
+    // Initial animation delay
+    const timer = setTimeout(() => {
+      const interval = setInterval(() => {
+        setStats(prev => ({
+          students: prev.students < 1250 ? Math.min(prev.students + 25, 1250) : 1250,
+          success: prev.success < 98 ? Math.min(prev.success + 2, 98) : 98,
+          progress: prev.progress < 70 ? Math.min(prev.progress + 1, 70) : 70
+        }))
+      }, 30)
+
+      return () => clearInterval(interval)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <section className="relative overflow-hidden py-16 sm:py-20 md:py-28 lg:py-36 bg-[#1a2e26]">
       {/* Chalkboard Texture Overlay */}
@@ -41,7 +58,7 @@ export function HeroSection() {
             <div className="space-y-6">
               <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.05] animate-in fade-in slide-in-from-left-8 duration-1000">
                 L&apos;Excellence <br /> 
-                <span className="font-caveat text-emerald-300 drop-shadow-[0_2px_10px_rgba(110,231,183,0.3)] rotate-[-2deg] inline-block mt-2">
+                <span className="font-caveat text-emerald-300 drop-shadow-[0_2px_10px_rgba(110,231,183,0.3)] rotate-[-2deg] inline-block mt-2 transition-transform duration-700 hover:rotate-0">
                   commence ici.
                 </span>
               </h1>
@@ -70,7 +87,7 @@ export function HeroSection() {
 
           <div className="flex-1 relative w-full max-w-[650px] animate-in fade-in zoom-in duration-1000 delay-500">
             {/* The "Tableau" Visual Element */}
-            <div className="relative aspect-[16/10] rounded-[3rem] p-4 bg-[#2a2a2a] border-[12px] border-[#3e2723] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] premium-shadow group">
+            <div className="relative aspect-[16/10] rounded-[3rem] p-4 bg-[#2a2a2a] border-[12px] border-[#3e2723] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] premium-shadow group hover:rotate-1 transition-transform duration-700">
               {/* Inner Chalkboard */}
               <div className="absolute inset-4 rounded-[2rem] bg-[#1a2e26] shadow-inner overflow-hidden flex items-center justify-center">
                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dust.png')]" />
@@ -78,27 +95,34 @@ export function HeroSection() {
                  {/* Chalk Drawings/UI Elements */}
                  <div className="w-[90%] h-[85%] border-2 border-dashed border-white/10 rounded-2xl flex flex-col p-6 space-y-6">
                     <div className="flex justify-between items-center">
-                      <div className="font-caveat text-3xl text-white/40">Dashboard_v1</div>
+                      <div className="font-caveat text-3xl text-white/40 animate-pulse">Dashboard_v1</div>
                       <div className="flex gap-4">
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/30" />
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/20" />
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/10" />
+                        <div className={`w-3 h-3 rounded-full transition-colors duration-500 ${stats.progress > 20 ? 'bg-emerald-500' : 'bg-white/10'}`} />
+                        <div className={`w-3 h-3 rounded-full transition-colors duration-500 ${stats.progress > 40 ? 'bg-emerald-500' : 'bg-white/10'}`} />
+                        <div className={`w-3 h-3 rounded-full transition-colors duration-500 ${stats.progress > 60 ? 'bg-emerald-500' : 'bg-white/10'}`} />
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-6 flex-1">
-                       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-end">
-                          <div className="font-caveat text-4xl text-emerald-200">1,250</div>
+                       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-end group/stat transition-colors hover:bg-white/[0.05]">
+                          <div className="font-caveat text-4xl text-emerald-200 tabular-nums">
+                            {stats.students.toLocaleString()}
+                          </div>
                           <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest mt-2">Étudiants</p>
                        </div>
-                       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-end">
-                          <div className="font-caveat text-4xl text-emerald-200">98%</div>
+                       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-end group/stat transition-colors hover:bg-white/[0.05]">
+                          <div className="font-caveat text-4xl text-emerald-200 tabular-nums">
+                            {stats.success}%
+                          </div>
                           <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest mt-2">Réussite</p>
                        </div>
                     </div>
 
                     <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full w-[70%] bg-emerald-400/20 rounded-full" />
+                      <div 
+                        className="h-full bg-emerald-400/40 rounded-full transition-all duration-1000 ease-out" 
+                        style={{ width: `${stats.progress}%` }}
+                      />
                     </div>
                  </div>
               </div>
@@ -107,8 +131,8 @@ export function HeroSection() {
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-3 bg-[#3e2723] rounded-full shadow-lg" />
               
               {/* Floating Chalks */}
-              <div className="absolute -bottom-8 right-20 w-12 h-3 bg-white rounded-sm rotate-[15deg] shadow-md opacity-90" />
-              <div className="absolute -bottom-6 right-36 w-8 h-3 bg-emerald-200 rounded-sm rotate-[-10deg] shadow-md opacity-80" />
+              <div className="absolute -bottom-8 right-20 w-12 h-3 bg-white rounded-sm rotate-[15deg] shadow-md opacity-90 animate-bounce [animation-duration:3s]" />
+              <div className="absolute -bottom-6 right-36 w-8 h-3 bg-emerald-200 rounded-sm rotate-[-10deg] shadow-md opacity-80 animate-bounce [animation-duration:2.5s]" />
             </div>
           </div>
         </div>
