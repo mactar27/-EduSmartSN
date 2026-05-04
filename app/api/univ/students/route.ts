@@ -27,19 +27,25 @@ export async function GET(request: NextRequest) {
     const students = await query<any[]>(`
       SELECT 
         e.id, 
-        COALESCE(u.name, 'Élève Importé') as name, 
-        u.email, 
         e.matricule as studentId, 
         e.filiere as department, 
-        e.statut
+        e.statut,
+        u.email,
+        u.name as name
       FROM etudiants e
       LEFT JOIN users u ON e.user_id = u.id
       ORDER BY e.id DESC
     `);
 
+    // Si name est vide, on essaie de construire le nom à partir de prenom/nom s'ils existent
+    const formattedStudents = students.map(s => ({
+      ...s,
+      name: s.name || "Élève Importé"
+    }));
+
     return NextResponse.json({ 
-      data: students || [],
-      count: students?.length || 0
+      data: formattedStudents || [],
+      count: formattedStudents?.length || 0
     });
   } catch (error: any) {
     console.error("Fetch Error:", error);
