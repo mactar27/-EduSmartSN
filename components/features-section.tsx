@@ -45,19 +45,19 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group p-4 sm:p-6 bg-background rounded-xl border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+              className="group p-8 sm:p-10 bg-background/50 backdrop-blur-sm rounded-[2rem] border border-border hover:border-primary/50 hover:shadow-2xl hover:premium-shadow transition-all duration-500 hover:-translate-y-2"
             >
-              <div className={`inline-flex p-2.5 sm:p-3 rounded-lg ${feature.bg} mb-3 sm:mb-4`}>
-                <feature.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${feature.color}`} />
+              <div className={`inline-flex p-4 rounded-2xl ${feature.bg} mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+                <feature.icon className={`h-8 w-8 ${feature.color}`} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
             </div>

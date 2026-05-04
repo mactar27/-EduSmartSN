@@ -53,7 +53,7 @@ export function UsersSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-            Un profil pour <span className="text-primary">chaque rôle</span>
+            Un profil pour <span className="text-gradient">chaque rôle</span>
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Des interfaces adaptées aux besoins spécifiques de chaque utilisateur.

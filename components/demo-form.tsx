@@ -155,17 +155,17 @@ export function DemoForm() {
         type="submit"
         size="lg"
         disabled={isSubmitting}
-        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/10 shimmer transition-transform hover:scale-[1.02] active:scale-[0.98]"
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
             Envoi en cours...
           </>
         ) : (
           <>
             Demander ma démo gratuite
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-5 w-5" />
           </>
         )}
       </Button>

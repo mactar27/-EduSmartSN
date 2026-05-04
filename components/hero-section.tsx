@@ -10,19 +10,17 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json())
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden py-12 sm:py-16 md:py-20 lg:py-32">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
+      {/* Premium background effects */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-float" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] animate-float [animation-delay:2s]" />
       </div>
 
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-4 sm:mb-6 text-balance">
-            L&apos;excellence académique <span className="text-primary">commence ici</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-4 sm:mb-6 text-balance leading-tight">
+            L&apos;excellence académique <span className="text-gradient">commence ici</span>
           </h1>
 
           {/* Subheadline */}
@@ -32,10 +30,10 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0">
-            <Link href="#demo-form">
-              <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-6 sm:px-8">
+            <Link href="#demo-form" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-8 sm:px-10 h-14 text-lg font-bold rounded-xl shadow-xl shadow-primary/20 shimmer transition-transform hover:scale-105 active:scale-95">
                 Demander une démo gratuite
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
           </div>
