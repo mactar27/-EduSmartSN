@@ -31,8 +31,15 @@ export function DemoForm() {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Une erreur est survenue")
+        const errorData = await response.json();
+        if (response.status === 429) {
+          toast.error("Demande déjà existante", {
+            description: errorData.error,
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        throw new Error(errorData.error || 'Échec de la soumission');
       }
 
       setIsSuccess(true)

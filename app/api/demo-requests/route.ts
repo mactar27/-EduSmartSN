@@ -42,6 +42,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Vérifier si une demande existe déjà pour cet email dans les 30 derniers jours
+    const existingRequest = await query<any[]>(
+      'SELECT id FROM demandes_demo WHERE email = ? AND created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+      [email]
+    );
+    
+    if (existingRequest.length > 0) {
+      return NextResponse.json(
+        { error: 'Une demande a déjà été faite pour cet établissement ces 30 derniers jours. Veuillez patienter ou nous contacter directement.' },
+        { status: 429 }
+      );
+    }
+    
     await query(
       'INSERT INTO demandes_demo (etablissement_name, contact_name, email, phone, message, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
       [etablissement_name, contact_name, email, phone, message]
