@@ -11,21 +11,28 @@ const getPoolConfig = () => {
   const dbUrl = process.env.DATABASE_URL;
   if (dbUrl) {
     const url = new URL(dbUrl);
-    return {
+    const config = {
       host: url.hostname,
       port: parseInt(url.port) || 3306,
       user: url.username,
       password: decodeURIComponent(url.password),
       database: url.pathname.substring(1),
       connectionLimit: 5,
-      connectTimeout: 10000,
+      connectTimeout: 15000,
       ssl: {
         rejectUnauthorized: false,
         minVersion: 'TLSv1.2',
         servername: url.hostname
       }
     };
+    console.log("Prisma Pool Config:", { ...config, password: "***" });
+    return config;
   }
+  
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error("CRITICAL: DATABASE_URL is not defined in production environment variables!");
+  }
+
   return {
     host: 'localhost',
     port: 3306,
