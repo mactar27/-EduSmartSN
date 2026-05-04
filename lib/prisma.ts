@@ -17,7 +17,11 @@ const getPoolConfig = () => {
       user: url.username,
       password: decodeURIComponent(url.password),
       database: url.pathname.substring(1),
-      connectionLimit: 5
+      connectionLimit: 5,
+      connectTimeout: 10000,
+      ssl: {
+        rejectUnauthorized: false
+      }
     };
   }
   return {
