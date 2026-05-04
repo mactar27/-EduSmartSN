@@ -1,29 +1,11 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
 import { 
-  School, 
   Plus, 
   Search, 
   ExternalLink, 
-  MoreVertical, 
-  ShieldCheck,
-  ShieldAlert
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import Link from "next/link"
-
-import { 
-  School, 
-  Plus, 
-  Search, 
-  ExternalLink, 
-  MoreVertical, 
   Trash2,
   Edit,
-  CheckCircle2,
-  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,11 +14,11 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export default function AdminTenants() {
   const [tenants, setTenants] = useState<any[]>([])
