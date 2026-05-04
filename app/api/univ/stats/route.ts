@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -12,35 +12,51 @@ export async function GET(request: NextRequest) {
     // For demo, if no tenantId, get the first active tenant
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM etablissements ORDER BY id ASC LIMIT 1');
-      if (tenants.length === 0) {
+      const firstTenant = await prisma.tenant.findFirst({
+        orderBy: { id: 'asc' }
+      });
+      
+      if (!firstTenant) {
         return NextResponse.json({
-          tenant: { name: "EduSmart SN", id: 0 },
+          tenant: { name: "EduSmart SN", id: "" },
           stats: { students: 0, enrollmentRate: "0%", totalRevenue: 0, paymentsByMethod: [] }
         });
       }
-      targetTenantId = tenants[0].id;
+      targetTenantId = firstTenant.id;
     }
 
-    const tenant = await query<any[]>('SELECT * FROM etablissements WHERE id = ?', [targetTenantId]);
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: targetTenantId }
+    });
     
-    let studentCount = [{ count: 0 }];
+    let studentCount = 0;
     try {
-      studentCount = await query<any[]>('SELECT COUNT(*) as count FROM etudiants WHERE etablissement_id = ? AND statut = "actif"', [targetTenantId]);
-    } catch (e) { console.error("Missing etudiants table?"); }
+      studentCount = await prisma.student.count({
+        where: { tenantId: targetTenantId }
+      });
+    } catch (e) { console.error("Error fetching students:", e); }
 
     let payments: any[] = [];
     try {
-      payments = await query<any[]>('SELECT SUM(montant) as total, methode FROM paiements WHERE etablissement_id = ? AND statut = "SUCCESS" GROUP BY methode', [targetTenantId]);
-    } catch (e) { console.error("Missing paiements table?"); }
+      payments = await prisma.payment.groupBy({
+        by: ['method'],
+        where: { 
+          tenantId: targetTenantId,
+          status: 'PAID'
+        },
+        _sum: {
+          amount: true
+        }
+      });
+    } catch (e) { console.error("Error fetching payments:", e); }
     
     return NextResponse.json({
-      tenant: tenant[0] || { name: "EduSmart University", id: targetTenantId },
+      tenant: tenant || { name: "EduSmart University", id: targetTenantId },
       stats: {
-        students: studentCount[0]?.count || 0,
+        students: studentCount || 0,
         enrollmentRate: "95%",
-        totalRevenue: payments.reduce((acc: number, p: any) => acc + (p.total || 0), 0),
-        paymentsByMethod: payments.map((p: any) => ({ method: p.methode, total: p.total }))
+        totalRevenue: payments.reduce((acc: number, p: any) => acc + (p._sum.amount || 0), 0),
+        paymentsByMethod: payments.map((p: any) => ({ method: p.method, total: p._sum.amount || 0 }))
       }
     });
   } catch (error) {
