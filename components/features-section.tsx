@@ -49,7 +49,7 @@ export function FeaturesSection() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group p-8 sm:p-10 bg-background/50 backdrop-blur-sm rounded-[2rem] border border-border hover:border-primary/50 hover:shadow-2xl hover:premium-shadow transition-all duration-500 hover:-translate-y-2"
+              className={`group p-8 sm:p-10 bg-background/50 backdrop-blur-sm rounded-[2rem] border border-border hover:border-primary/50 hover:shadow-2xl hover:premium-shadow transition-all duration-500 hover:-translate-y-2 animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-${(index + 1) * 100}`}
             >
               <div className={`inline-flex p-4 rounded-2xl ${feature.bg} mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
                 <feature.icon className={`h-8 w-8 ${feature.color}`} />
