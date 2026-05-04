@@ -13,10 +13,10 @@ import {
 
 const modules = [
   {
-    id: "finance",
+    id: "enrollment",
     icon: Wallet,
-    title: "Gestion Financière",
-    description: "Suivez les paiements de scolarité, gérez les impayés et générez des reçus administratifs.",
+    title: "Gestion des Inscriptions",
+    description: "Simplifiez le processus d'admission et de réinscription de vos étudiants en toute sécurité.",
     color: "primary",
   },
   {

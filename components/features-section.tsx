@@ -24,8 +24,8 @@ const features = [
   },
   {
     icon: Smartphone,
-    title: "Suivi Simplifié",
-    description: "Accès facile aux informations pour les parents et étudiants.",
+    title: "Portail Étudiant",
+    description: "Un espace dédié pour consulter les notes, cours et emploi du temps.",
     color: "text-accent",
     bg: "bg-accent/10",
   },
