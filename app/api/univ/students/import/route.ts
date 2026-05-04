@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
 
         // 1. Créer l'utilisateur d'abord
         const userResult = await query<any>(
-          `INSERT INTO users (name, email, role, password, created_at, updated_at) 
-           VALUES (?, ?, 'student', 'pass123', NOW(), NOW())`,
-          [student.name, email]
+          `INSERT INTO users (name, email, role, password, password_hash, etablissement_id, created_at, updated_at) 
+           VALUES (?, ?, 'student', 'pass123', 'pass123', ?, NOW(), NOW())`,
+          [student.name, email, tenantId]
         );
 
         const userId = userResult.insertId;

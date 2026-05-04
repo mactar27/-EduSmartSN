@@ -23,14 +23,14 @@ export async function GET(request: NextRequest) {
     const students = await query<any[]>(`
       SELECT 
         e.id, 
-        u.name, 
+        COALESCE(u.name, 'Élève Sans Nom') as name, 
         u.email, 
-        e.matricule, 
+        e.matricule as studentId, 
         e.filiere as department, 
         e.statut,
         n.value as grade
       FROM etudiants e
-      JOIN users u ON e.user_id = u.id
+      LEFT JOIN users u ON e.user_id = u.id
       LEFT JOIN notes n ON e.id = n.student_id AND n.subject_code = ?
       WHERE e.etablissement_id = ?
       ORDER BY e.id DESC
