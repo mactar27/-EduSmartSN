@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server"
-import { pool } from "@/lib/db"
+import { db } from "@/lib/db"
 
 export async function GET() {
   try {
     // Get total students
-    const [studentsResult]: any = await pool.query("SELECT COUNT(*) as total FROM etudiants")
+    const [studentsResult]: any = await db.query("SELECT COUNT(*) as total FROM etudiants")
     const totalStudents = studentsResult[0].total || 0
 
     // Get total establishments
-    const [tenantsResult]: any = await pool.query("SELECT COUNT(*) as total FROM etablissements")
+    const [tenantsResult]: any = await db.query("SELECT COUNT(*) as total FROM etablissements")
     const totalTenants = tenantsResult[0].total || 0
 
     // Get success rate (based on course validations)
-    const [successResult]: any = await pool.query(`
+    const [successResult]: any = await db.query(`
       SELECT 
         (COUNT(CASE WHEN statut = 'valide' THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0)) as rate 
       FROM inscriptions_cours
