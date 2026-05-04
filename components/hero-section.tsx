@@ -9,86 +9,106 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden py-20 sm:py-24 md:py-32 lg:py-40">
-      {/* Ultra-Visible background effects */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/40 rounded-full blur-[140px] animate-pulse" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[120px] animate-float" />
-        <div className="absolute top-[20%] left-[20%] w-[300px] h-[300px] bg-purple-500/20 rounded-full blur-[100px] animate-float [animation-delay:4s]" />
-      </div>
+    <section className="relative overflow-hidden py-16 sm:py-20 md:py-28 lg:py-36 bg-[#1a2e26]">
+      {/* Chalkboard Texture Overlay */}
+      <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" 
+           style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/black-linen.png')" }} />
       
-      {/* Subtle tech overlay */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] -z-10" />
+      {/* Chalk Dust Particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white/20 rounded-full blur-[1px] animate-pulse" />
+        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-white/10 rounded-full blur-[2px] animate-pulse [animation-delay:2s]" />
+        <div className="absolute bottom-1/4 left-1/2 w-1 h-1 bg-white/15 rounded-full blur-[1px] animate-pulse [animation-delay:4s]" />
+      </div>
+
+      {/* Decorative Glows */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px]" />
+      </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          <div className="flex-1 text-center lg:text-left space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary animate-in fade-in slide-in-from-top-4 duration-1000">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          <div className="flex-1 text-center lg:text-left space-y-10">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-emerald-100/80 backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-xs font-bold uppercase tracking-widest">Souveraineté Numérique</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Souveraineté Numérique Sénégalaise</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-8 duration-1000">
-              L&apos;Intelligence <span className="text-gradient">Collective</span> au service de l&apos;Éducation
-            </h1>
+            <div className="space-y-6">
+              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.05] animate-in fade-in slide-in-from-left-8 duration-1000">
+                L&apos;Excellence <br /> 
+                <span className="font-caveat text-emerald-300 drop-shadow-[0_2px_10px_rgba(110,231,183,0.3)] rotate-[-2deg] inline-block mt-2">
+                  commence ici.
+                </span>
+              </h1>
 
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
-              Gérez votre établissement avec la plateforme SaaS n°1 au Sénégal. 
-              Conçue pour l&apos;excellence académique et la sécurité totale de vos données.
-            </p>
+              <p className="text-xl sm:text-2xl text-emerald-50/70 max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
+                Pilotez votre établissement avec la plateforme de gestion <span className="text-white font-bold underline decoration-emerald-500/50 underline-offset-8">souveraine</span> de référence au Sénégal.
+              </p>
+            </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-left-8 duration-1000 delay-300">
+            <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-left-8 duration-1000 delay-300">
               <Link href="#demo-form" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-10 h-16 text-lg font-bold rounded-2xl shadow-2xl shadow-primary/30 shimmer">
-                  Démarrer maintenant
+                <Button size="lg" className="w-full sm:w-auto bg-white text-[#1a2e26] hover:bg-emerald-50 gap-3 px-10 h-16 text-lg font-black rounded-2xl shadow-2xl transition-all hover:scale-105 active:scale-95">
+                  Demander une démo
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
+              
+              <button className="flex items-center gap-3 text-emerald-100/60 hover:text-white transition-colors group">
+                <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 transition-all group-hover:scale-110">
+                  <Play className="h-4 w-4 fill-current ml-1" />
+                </div>
+                <span className="font-bold text-sm tracking-wide">Voir la vidéo</span>
+              </button>
             </div>
           </div>
 
-          <div className="flex-1 relative w-full max-w-[600px] animate-in fade-in zoom-in duration-1000 delay-500">
-            {/* Visual element representing the platform */}
-            <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-border shadow-2xl premium-shadow glass group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-indigo-600/5 transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                 {/* This would be a generated image or a mockup */}
-                 <div className="w-[85%] h-[80%] bg-background/80 rounded-2xl border border-border shadow-2xl p-6 space-y-6 animate-float">
-                    <div className="flex items-center justify-between border-b border-border pb-4">
-                      <div className="h-4 w-32 bg-muted rounded-full" />
-                      <div className="flex gap-2">
-                        <div className="h-6 w-6 rounded-full bg-primary/20" />
-                        <div className="h-6 w-6 rounded-full bg-primary/10" />
+          <div className="flex-1 relative w-full max-w-[650px] animate-in fade-in zoom-in duration-1000 delay-500">
+            {/* The "Tableau" Visual Element */}
+            <div className="relative aspect-[16/10] rounded-[3rem] p-4 bg-[#2a2a2a] border-[12px] border-[#3e2723] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] premium-shadow group">
+              {/* Inner Chalkboard */}
+              <div className="absolute inset-4 rounded-[2rem] bg-[#1a2e26] shadow-inner overflow-hidden flex items-center justify-center">
+                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dust.png')]" />
+                 
+                 {/* Chalk Drawings/UI Elements */}
+                 <div className="w-[90%] h-[85%] border-2 border-dashed border-white/10 rounded-2xl flex flex-col p-6 space-y-6">
+                    <div className="flex justify-between items-center">
+                      <div className="font-caveat text-3xl text-white/40">Dashboard_v1</div>
+                      <div className="flex gap-4">
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/30" />
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/20" />
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/10" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="h-20 bg-primary/5 rounded-xl border border-primary/10" />
-                      <div className="h-20 bg-primary/5 rounded-xl border border-primary/10" />
-                      <div className="h-20 bg-primary/5 rounded-xl border border-primary/10" />
+                    
+                    <div className="grid grid-cols-2 gap-6 flex-1">
+                       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-end">
+                          <div className="font-caveat text-4xl text-emerald-200">1,250</div>
+                          <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest mt-2">Étudiants</p>
+                       </div>
+                       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-end">
+                          <div className="font-caveat text-4xl text-emerald-200">98%</div>
+                          <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest mt-2">Réussite</p>
+                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="h-4 w-full bg-muted rounded-full" />
-                      <div className="h-4 w-[80%] bg-muted rounded-full" />
-                      <div className="h-4 w-[60%] bg-muted rounded-full" />
+
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full w-[70%] bg-emerald-400/20 rounded-full" />
                     </div>
                  </div>
               </div>
-            </div>
-            
-            {/* Floating badges */}
-            <div className="absolute -top-6 -right-6 p-4 rounded-2xl bg-white shadow-xl border border-border animate-float [animation-delay:2s] dark:bg-slate-900">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                  <span className="font-bold text-xs">+99%</span>
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black">Disponibilité</p>
-                  <p className="text-sm font-bold">Cloud Souverain</p>
-                </div>
-              </div>
+
+              {/* Wooden chalk shelf */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-3 bg-[#3e2723] rounded-full shadow-lg" />
+              
+              {/* Floating Chalks */}
+              <div className="absolute -bottom-8 right-20 w-12 h-3 bg-white rounded-sm rotate-[15deg] shadow-md opacity-90" />
+              <div className="absolute -bottom-6 right-36 w-8 h-3 bg-emerald-200 rounded-sm rotate-[-10deg] shadow-md opacity-80" />
             </div>
           </div>
         </div>
