@@ -45,20 +45,19 @@ export async function GET(request: NextRequest) {
     
   } catch (error: any) {
     console.error("Fetch Error:", error);
-    // Deuxième essai si la première table n'existe pas
+    // Deuxième essai sur l'autre table en cas d'erreur SQL (ex: table manquante)
     try {
        const students = await query<any[]>(`SELECT id, matricule as studentId, department, status as statut FROM Student ORDER BY id DESC`);
-       return NextResponse.json({ data: students, count: students.length });
+       return NextResponse.json({ 
+         data: students.map(s => ({ ...s, name: "Élève #" + s.id })), 
+         count: students.length 
+       });
     } catch (e) {
-       return NextResponse.json({ error: 'SQL_ERROR', message: error.message }, { status: 500 });
+       return NextResponse.json({ 
+         error: 'SQL_ERROR', 
+         message: error.message 
+       }, { status: 500 });
     }
-  }
-  } catch (error: any) {
-    console.error("Fetch Error:", error);
-    return NextResponse.json({ 
-      error: 'SQL_ERROR', 
-      message: error.message 
-    }, { status: 500 });
   }
 }
 
