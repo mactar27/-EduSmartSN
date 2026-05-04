@@ -1,10 +1,6 @@
-"use client";
-
-import { Bell, Search, Moon, Sun } from "lucide-react";
-import { useState } from "react";
+import { Bell, Search } from "lucide-react";
 
 export function AdminHeader() {
-  const [isDark, setIsDark] = useState(false);
 
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-8">
@@ -18,12 +14,6 @@ export function AdminHeader() {
       </div>
 
       <div className="flex items-center gap-4">
-        <button 
-          onClick={() => setIsDark(!isDark)}
-          className="p-2.5 rounded-xl hover:bg-muted transition-colors text-muted-foreground"
-        >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
         
         <button className="relative p-2.5 rounded-xl hover:bg-muted transition-colors text-muted-foreground">
           <Bell size={20} />
