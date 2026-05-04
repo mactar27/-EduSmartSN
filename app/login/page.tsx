@@ -32,8 +32,10 @@ export default function LoginPage() {
 
       if (res.ok) {
         const userRole = data.user.role?.toUpperCase();
-        if (userRole === 'SUPER_ADMIN') {
+        if (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN') {
           router.push('/admin/dashboard')
+        } else if (userRole === 'STUDENT') {
+          router.push('/student/dashboard')
         } else {
           router.push('/univ/dashboard')
         }
