@@ -31,14 +31,12 @@ export async function GET(request: NextRequest) {
         u.email, 
         e.matricule as studentId, 
         e.filiere as department, 
-        e.statut,
-        n.value as grade
+        e.statut
       FROM etudiants e
       LEFT JOIN users u ON e.user_id = u.id
-      LEFT JOIN notes n ON e.id = n.student_id AND n.subject_code = ?
       WHERE e.etablissement_id = ?
       ORDER BY e.id DESC
-    `, [subjectCode, targetTenantId]);
+    `, [targetTenantId]);
 
     return NextResponse.json({ 
       data: students || [],
