@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
     const { students } = await request.json();
     console.log(`Starting import of ${students?.length} students`);
     
-    // On récupère l'établissement actif
-    const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
-    if (!tenants || tenants.length === 0) {
+    // On récupère l'établissement actif via Prisma
+    const tenant = await prisma.tenant.findFirst({
+      where: { status: 'ACTIVE' },
+      orderBy: { createdAt: 'asc' }
+    });
+    
+    if (!tenant) {
       return NextResponse.json({ error: 'Aucun établissement actif trouvé' }, { status: 404 });
     }
-    const tenantId = tenants[0].id;
+    const tenantId = tenant.id;
     console.log(`Targeting tenant ID: ${tenantId}`);
 
     let successCount = 0;
@@ -20,21 +24,24 @@ export async function POST(request: NextRequest) {
         const matricule = student.studentId || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`;
         const email = student.email || `${matricule.toLowerCase()}@edusmart.sn`;
 
-        // 1. Créer l'utilisateur d'abord
-        const userResult = await query<any>(
-          `INSERT INTO users (name, email, role, password, password_hash, etablissement_id, created_at, updated_at) 
-           VALUES (?, ?, 'student', 'pass123', 'pass123', ?, NOW(), NOW())`,
-          [student.name, email, tenantId]
-        );
-
-        const userId = userResult.insertId;
-
-        // 2. Créer le profil élève lié
-        await query(
-          `INSERT INTO etudiants (user_id, matricule, filiere, etablissement_id, statut, created_at, updated_at) 
-           VALUES (?, ?, ?, ?, 'actif', NOW(), NOW())`,
-          [userId, matricule, student.department || 'Général', tenantId]
-        );
+        // Utilisation de Prisma pour créer le User et le Student lié en une seule transaction
+        await prisma.user.create({
+          data: {
+            name: student.name,
+            email: email,
+            role: 'STUDENT',
+            password: 'password123', // TODO: utiliser bcrypt pour hasher
+            tenantId: tenantId,
+            studentProfile: {
+              create: {
+                studentId: matricule,
+                name: student.name,
+                department: student.department || 'Général',
+                tenantId: tenantId
+              }
+            }
+          }
+        });
         
         successCount++;
       } catch (err) {
