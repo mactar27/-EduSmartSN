@@ -20,7 +20,9 @@ const getPoolConfig = () => {
       connectionLimit: 5,
       connectTimeout: 10000,
       ssl: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2',
+        servername: url.hostname
       }
     };
   }
