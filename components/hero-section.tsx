@@ -55,10 +55,6 @@ export function HeroSection() {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto border-muted-foreground/30 text-foreground hover:bg-muted gap-2">
-              <Play className="h-4 w-4" />
-              Voir la vidéo
-            </Button>
           </div>
 
           {/* Stats */}
