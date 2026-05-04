@@ -24,23 +24,21 @@ export async function GET(request: NextRequest) {
     // Requête avec jointure pour récupérer le nom depuis la table users
     const subjectCode = searchParams.get('subjectId') || 'INF1011';
 
+    // URGENCE : On n'utilise PLUS la table users pour l'instant car elle cause le 500
     const students = await query<any[]>(`
       SELECT 
-        e.id, 
-        e.matricule as studentId, 
-        e.filiere as department, 
-        e.statut,
-        u.email,
-        u.name as name
-      FROM etudiants e
-      LEFT JOIN users u ON e.user_id = u.id
-      ORDER BY e.id DESC
+        id, 
+        matricule as studentId, 
+        filiere as department, 
+        statut
+      FROM etudiants
+      ORDER BY id DESC
     `);
 
-    // Si name est vide, on essaie de construire le nom à partir de prenom/nom s'ils existent
     const formattedStudents = students.map(s => ({
       ...s,
-      name: s.name || "Élève Importé"
+      name: "Élève #" + s.id, // Nom temporaire
+      email: "email@non.disponible"
     }));
 
     return NextResponse.json({ 
