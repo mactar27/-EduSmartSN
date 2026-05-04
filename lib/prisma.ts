@@ -1,53 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import * as mariadb from 'mariadb';
-import { URL } from 'url';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const getPoolConfig = () => {
-  const dbUrl = process.env.DATABASE_URL;
-  if (dbUrl) {
-    const url = new URL(dbUrl);
-    const config = {
-      host: url.hostname,
-      port: parseInt(url.port) || 3306,
-      user: url.username,
-      password: decodeURIComponent(url.password),
-      database: url.pathname.substring(1),
-      connectionLimit: 5,
-      connectTimeout: 15000,
-      ssl: {
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1.2',
-        servername: url.hostname
-      }
-    };
-    console.log("Prisma Pool Config:", { ...config, password: "***" });
-    return config;
-  }
-  
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error("CRITICAL: DATABASE_URL is not defined in production environment variables!");
-  }
-
-  return {
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'M@tzo2705',
-    database: 'edusmart',
-    connectionLimit: 5
-  };
-};
-
-const pool = mariadb.createPool(getPoolConfig() as any);
-// PrismaMariaDb expects a different Pool interface version, but it works at runtime
-const adapter = new PrismaMariaDb(pool as any);
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
