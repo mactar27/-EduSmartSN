@@ -28,15 +28,16 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Logo and description */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-block mb-3 sm:mb-4">
+            <Link href="/" className="inline-block mb-4 sm:mb-6">
               <Image
                 src="/logo.png"
                 alt="EduSmart SN Logo"
-                width={120}
-                height={40}
-                className="h-8 sm:h-10 w-auto"
+                width={160}
+                height={60}
+                className="h-14 sm:h-16 w-auto"
               />
             </Link>
+            <p className="text-sm font-bold text-[#064e3b] uppercase tracking-wider mb-2">EDUSMART SN</p>
             <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
               La plateforme SaaS de gestion universitaire moderne du Sénégal.
             </p>

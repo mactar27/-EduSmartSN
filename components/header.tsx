@@ -21,21 +21,21 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/95 backdrop-blur-md">
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
         {/* Logo Section */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-12 h-12 flex items-center justify-center">
+        <Link href="/" className="flex items-center gap-4 group">
+          <div className="relative w-16 h-16 flex items-center justify-center">
             <Image
               src="/logo.png"
               alt="EduSmart Logo"
-              width={48}
-              height={48}
+              width={64}
+              height={64}
               className="object-contain"
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-black tracking-tighter text-[#064e3b] leading-none uppercase">
+            <span className="text-3xl font-black tracking-tighter text-[#064e3b] leading-none uppercase">
               EDUSMART
             </span>
-            <span className="text-[10px] font-bold tracking-[0.3em] text-[#10b981] uppercase leading-none mt-1">
+            <span className="text-xs font-bold tracking-[0.3em] text-[#10b981] uppercase leading-none mt-1.5">
               Smarter Education
             </span>
           </div>
