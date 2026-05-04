@@ -37,7 +37,7 @@ const getPoolConfig = () => {
 };
 
 const pool = mariadb.createPool(getPoolConfig());
-// @ts-expect-error - PrismaMariaDb expects a different Pool interface version, but it works at runtime
+// PrismaMariaDb expects a different Pool interface version, but it works at runtime
 const adapter = new PrismaMariaDb(pool as any);
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
