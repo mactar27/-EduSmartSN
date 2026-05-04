@@ -13,12 +13,22 @@ export async function GET(request: NextRequest) {
 
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
-      if (!tenants || tenants.length === 0) {
-        console.warn("No active establishment found for student fetch");
-        return NextResponse.json({ data: [], count: 0, warning: "NO_ACTIVE_TENANT" });
+      let tenants: any[] = [];
+      try {
+        // Essai sur la table Prisma de production
+        tenants = await query<any[]>('SELECT id FROM Tenant WHERE status = "ACTIVE" ORDER BY id ASC LIMIT 1');
+      } catch (e) {
+        // Repli sur la table locale
+        try {
+          tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
+        } catch (e2) {
+          console.warn("No Tenant or etablissements table found.");
+        }
       }
-      targetTenantId = tenants[0].id;
+      
+      if (tenants && tenants.length > 0) {
+        targetTenantId = tenants[0].id;
+      }
     }
 
     // Requête avec jointure pour récupérer le nom depuis la table users
@@ -26,18 +36,29 @@ export async function GET(request: NextRequest) {
 
     // Résilience maximale : on prend TOUT sans nommer de colonnes précises
     let rawData: any[] = [];
+    let diagnosticLog = "";
     try {
       rawData = await query<any[]>(`SELECT * FROM etudiants ORDER BY id DESC LIMIT 100`);
-    } catch (e) {
+      diagnosticLog += "Query etudiants success. ";
+    } catch (e: any) {
+      diagnosticLog += "Query etudiants FAILED: " + e.message + " | ";
       try {
         rawData = await query<any[]>(`SELECT * FROM Student ORDER BY id DESC LIMIT 100`);
-      } catch (e2) {
-        return NextResponse.json({ error: "ALL_TABLES_FAILED", details: e2.message }, { status: 500 });
+        diagnosticLog += "Query Student success. ";
+      } catch (e2: any) {
+        diagnosticLog += "Query Student FAILED: " + e2.message;
+        // RETOURNER 200 AVEC L'ERREUR POUR POUVOIR LA LIRE
+        return NextResponse.json({ 
+          error: "ALL_TABLES_FAILED", 
+          details: diagnosticLog,
+          data: [],
+          count: 0
+        });
       }
     }
 
     const formattedStudents = (rawData || []).map(s => ({
-      id: s.id,
+      id: s.id || s._id || Math.random(),
       name: s.name || (s.prenom ? `${s.prenom} ${s.nom}` : s.nom) || ("Élève #" + s.id),
       email: s.email || "---",
       studentId: s.matricule || s.studentId || "---",
@@ -47,14 +68,18 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       data: formattedStudents,
-      count: formattedStudents.length
+      count: formattedStudents.length,
+      debug: diagnosticLog
     });
   } catch (error: any) {
     console.error("Fetch Error:", error);
+    // RETOURNER 200 AVEC L'ERREUR POUR POUVOIR LA LIRE
     return NextResponse.json({ 
       error: 'CRITICAL_ERROR', 
-      message: error.message 
-    }, { status: 500 });
+      message: error.message,
+      data: [],
+      count: 0
+    });
   }
 }
 

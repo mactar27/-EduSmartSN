@@ -28,6 +28,12 @@ export default function StudentListPage() {
     try {
       const res = await fetch('/api/univ/students')
       const data = await res.json()
+      
+      if (data.error) {
+        console.error("API Error Details:", data);
+        alert(`Diagnostic : ${data.error} \nDétails: ${data.details || data.message}`);
+      }
+
       if (data.data) {
         setStudents(data.data)
       } else {
