@@ -11,46 +11,25 @@ const features = [
   {
     icon: Building2,
     title: "Multi-Tenant",
-    description: "Une instance unique pour tous vos établissements avec isolation complète des données.",
+    description: "Isolation complète des données pour chaque établissement.",
     color: "text-primary",
     bg: "bg-primary/10",
-  },
-  {
-    icon: Palette,
-    title: "White Label",
-    description: "Personnalisez logo, couleurs et domaine pour chaque université (ex: uam.edusmart.sn).",
-    color: "text-secondary",
-    bg: "bg-secondary/10",
   },
   {
     icon: Shield,
-    title: "Données Souveraines",
-    description: "Vos données restent au Sénégal, hébergées sur des serveurs locaux sécurisés.",
-    color: "text-primary",
-    bg: "bg-primary/10",
+    title: "Souveraineté",
+    description: "Vos données restent au Sénégal sur des serveurs sécurisés.",
+    color: "text-secondary",
+    bg: "bg-secondary/10",
   },
   {
     icon: Smartphone,
     title: "Paiements Mobiles",
-    description: "Intégration native avec Wave, Orange Money et Free Money pour les paiements.",
+    description: "Intégration native Wave, Orange Money et Free Money.",
     color: "text-accent",
     bg: "bg-accent/10",
   },
-  {
-    icon: Globe,
-    title: "Accessible Partout",
-    description: "Application web responsive accessible depuis n&apos;importe quel appareil connecté.",
-    color: "text-secondary",
-    bg: "bg-secondary/10",
-  },
-  {
-    icon: Clock,
-    title: "Temps Réel",
-    description: "Suivi en temps réel des paiements, absences et résultats académiques.",
-    color: "text-primary",
-    bg: "bg-primary/10",
-  },
-]
+];
 
 export function FeaturesSection() {
   return (

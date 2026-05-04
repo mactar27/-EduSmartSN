@@ -79,15 +79,21 @@ export function EtablissementsSection() {
                   </p>
                 )}
 
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1.5 text-foreground/80">
-                    <Users className="h-4 w-4 text-secondary" />
-                    <span>{etablissement.student_count.toLocaleString()} étudiants</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-foreground/80">
-                    <GraduationCap className="h-4 w-4 text-primary" />
-                    <span>{etablissement.professor_count} profs</span>
-                  </div>
+                <div className="flex items-center gap-4 text-sm mt-auto pt-4">
+                  {etablissement.student_count > 0 && (
+                    <div className="flex items-center gap-1.5 text-foreground/80">
+                      <Users className="h-4 w-4 text-secondary" />
+                      <span>{etablissement.student_count.toLocaleString()} étudiants</span>
+                    </div>
+                  )}
+                  {etablissement.professor_count > 0 ? (
+                    <div className="flex items-center gap-1.5 text-foreground/80">
+                      <GraduationCap className="h-4 w-4 text-primary" />
+                      <span>{etablissement.professor_count} profs</span>
+                    </div>
+                  ) : (
+                    <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Nouveau</span>
+                  )}
                 </div>
               </div>
             ))}

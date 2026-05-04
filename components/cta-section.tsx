@@ -54,21 +54,6 @@ export function CTASection() {
               </div>
             </div>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-secondary" />
-                Réponse sous 24h
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-secondary" />
-                Démo personnalisée
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-secondary" />
-                Sans engagement
-              </div>
-            </div>
           </div>
 
           {/* Right side - Form */}

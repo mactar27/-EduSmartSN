@@ -17,12 +17,6 @@ const modules = [
     icon: Wallet,
     title: "Module Financier",
     description: "Gestion complète des paiements avec intégration Wave, Orange Money et Free Money.",
-    features: [
-      "Génération automatique des factures",
-      "Relances SMS automatiques",
-      "Suivi des impayés en temps réel",
-      "Rapports financiers détaillés",
-    ],
     color: "primary",
   },
   {
@@ -30,12 +24,6 @@ const modules = [
     icon: GraduationCap,
     title: "Module Pédagogique",
     description: "Gestion académique complète selon le système LMD sénégalais.",
-    features: [
-      "Saisie et calcul des notes",
-      "Gestion des examens et rattrapages",
-      "Cartes étudiants avec QR Code",
-      "Relevés de notes automatiques",
-    ],
     color: "secondary",
   },
   {
@@ -43,12 +31,6 @@ const modules = [
     icon: MessageSquare,
     title: "Module Communication",
     description: "Restez connecté avec étudiants, parents et professeurs.",
-    features: [
-      "Notifications SMS et email",
-      "Messagerie interne",
-      "Annonces et actualités",
-      "Alertes automatiques",
-    ],
     color: "accent",
   },
   {
@@ -56,12 +38,6 @@ const modules = [
     icon: Calendar,
     title: "Emplois du Temps",
     description: "Planification et gestion des cours et salles.",
-    features: [
-      "Planning interactif",
-      "Gestion des salles",
-      "Conflits détectés automatiquement",
-      "Export PDF et iCal",
-    ],
     color: "primary",
   },
   {
@@ -69,25 +45,13 @@ const modules = [
     icon: FileText,
     title: "Documents",
     description: "Génération et gestion des documents administratifs.",
-    features: [
-      "Certificats de scolarité",
-      "Attestations de réussite",
-      "Demandes en ligne",
-      "Signatures électroniques",
-    ],
     color: "secondary",
   },
   {
     id: "dashboards",
     icon: BarChart3,
     title: "Tableaux de Bord",
-    description: "Visualisez toutes vos données en un coup d&apos;œil.",
-    features: [
-      "KPIs en temps réel",
-      "Graphiques interactifs",
-      "Rapports personnalisés",
-      "Export des données",
-    ],
+    description: "Visualisez toutes vos données en un coup d'œil.",
     color: "accent",
   },
 ]
@@ -148,18 +112,9 @@ export function ModulesSection() {
                   </div>
                 </div>
 
-                <p className="text-base sm:text-xl text-muted-foreground mb-8 leading-relaxed">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {activeModule.description}
                 </p>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {activeModule.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl border border-border/50 group hover:bg-muted/50 transition-colors">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-                      <span className="text-sm sm:text-base font-medium text-foreground/80">{feature}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
