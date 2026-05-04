@@ -1,21 +1,29 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import * as mariadb from 'mariadb';
 
-const pool = mariadb.createPool({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: 'M@tzo2705',
-  database: 'edusmart',
-  connectionLimit: 1
-});
-
-const adapter = new PrismaMariaDb(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
-  // ... rest of the code is the same
+  
+  const tenant = await prisma.tenant.upsert({
+    where: { subdomain: 'edusmart' },
+    update: {},
+    create: {
+      name: 'EduSmart',
+      domain: 'edusmart.sn',
+      subdomain: 'edusmart',
+    },
+  });
+
+  console.log('Seeded tenant:', tenant);
 }
-// ...
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
