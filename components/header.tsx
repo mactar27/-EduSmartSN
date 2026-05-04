@@ -67,12 +67,12 @@ export function Header() {
           
           <div className="flex items-center gap-3">
             <Link href="/login">
-              <Button className="bg-[#06110d] text-white hover:bg-[#0c2018] h-11 px-8 rounded-full font-bold text-sm shadow-lg shadow-black/5">
+              <Button variant="ghost" className="text-[#064e3b] hover:text-[#059669] hover:bg-emerald-50 h-11 px-6 rounded-full font-bold text-sm">
                 Se connecter
               </Button>
             </Link>
             <Link href="#demo-form">
-              <Button className="bg-[#059669] text-white hover:bg-[#047857] h-11 px-8 rounded-full font-bold text-sm shadow-lg shadow-emerald-500/10">
+              <Button className="bg-[#1a2e26] text-white hover:bg-[#2a4539] h-11 px-8 rounded-full font-bold text-sm shadow-lg shadow-black/5">
                 S&apos;inscrire
               </Button>
             </Link>
@@ -109,12 +109,12 @@ export function Header() {
             ))}
             <div className="flex flex-col gap-3 pt-6 border-t border-slate-100">
               <Link href="/login" className="w-full">
-                <Button className="w-full bg-[#06110d] text-white h-12 rounded-xl font-bold">
+                <Button variant="outline" className="w-full border-[#064e3b] text-[#064e3b] h-12 rounded-xl font-bold">
                   Se connecter
                 </Button>
               </Link>
               <Link href="#demo-form" className="w-full">
-                <Button className="w-full bg-[#059669] text-white h-12 rounded-xl font-bold">
+                <Button className="w-full bg-[#1a2e26] text-white h-12 rounded-xl font-bold">
                   S&apos;inscrire
                 </Button>
               </Link>
