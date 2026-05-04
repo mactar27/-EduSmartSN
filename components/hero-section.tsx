@@ -6,15 +6,18 @@ import { ArrowRight, Play } from "lucide-react"
 import Link from "next/link"
 
 export function HeroSection() {
+  const { data: dbStats } = useSWR("/api/public/stats", fetcher)
   const [stats, setStats] = useState({ students: 0, success: 0, progress: 0 })
 
   useEffect(() => {
+    if (!dbStats) return
+
     // Initial animation delay
     const timer = setTimeout(() => {
       const interval = setInterval(() => {
         setStats(prev => ({
-          students: prev.students < 1250 ? Math.min(prev.students + 25, 1250) : 1250,
-          success: prev.success < 98 ? Math.min(prev.success + 2, 98) : 98,
+          students: prev.students < dbStats.totalStudents ? Math.min(prev.students + Math.ceil(dbStats.totalStudents / 50), dbStats.totalStudents) : dbStats.totalStudents,
+          success: prev.success < dbStats.successRate ? Math.min(prev.success + 1, dbStats.successRate) : dbStats.successRate,
           progress: prev.progress < 70 ? Math.min(prev.progress + 1, 70) : 70
         }))
       }, 30)
@@ -23,7 +26,7 @@ export function HeroSection() {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [dbStats])
 
   return (
     <section className="relative overflow-hidden py-16 sm:py-20 md:py-28 lg:py-36 bg-[#1a2e26]">
