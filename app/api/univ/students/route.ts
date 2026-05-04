@@ -18,19 +18,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Requête avec jointure pour récupérer le nom depuis la table users
+    const subjectCode = searchParams.get('subjectId') || 'INF1011';
+
     const students = await query<any[]>(`
       SELECT 
         e.id, 
         u.name, 
         u.email, 
-        e.matricule as studentId, 
+        e.matricule, 
         e.filiere as department, 
-        e.statut 
+        e.statut,
+        n.value as grade
       FROM etudiants e
       JOIN users u ON e.user_id = u.id
+      LEFT JOIN notes n ON e.id = n.student_id AND n.subject_code = ?
       WHERE e.etablissement_id = ?
       ORDER BY e.id DESC
-    `, [targetTenantId]);
+    `, [subjectCode, targetTenantId]);
 
     return NextResponse.json({ 
       data: students || [],

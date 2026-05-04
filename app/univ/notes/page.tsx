@@ -24,7 +24,13 @@ export default function GradeEntry() {
       try {
         const res = await fetch(`/api/univ/students?subjectId=${selectedSubject}`)
         const data = await res.json()
-        if (data.students) setStudents(data.students)
+        if (data.data) {
+          const formattedStudents = data.data.map((s: any) => ({
+            ...s,
+            grade: s.grade !== null && s.grade !== undefined ? s.grade.toString() : ""
+          }))
+          setStudents(formattedStudents)
+        }
       } catch (e) {
         console.error("Erreur chargement étudiants:", e)
       }

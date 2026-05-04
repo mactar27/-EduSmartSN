@@ -12,28 +12,30 @@ export async function GET(request: NextRequest) {
     // For demo, if no tenantId, get the first active tenant
     let targetTenantId = tenantId;
     if (!targetTenantId) {
-      const tenants = await query<any[]>('SELECT id FROM etablissements WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
+      const tenants = await query<any[]>('SELECT id FROM etablissements ORDER BY id ASC LIMIT 1');
       if (tenants.length === 0) {
-        // Retourner un état initial plutôt qu'une erreur 404
         return NextResponse.json({
-          tenant: { name: "EduSmart SN" },
-          stats: {
-            students: 0,
-            enrollmentRate: "0%",
-            totalRevenue: 0,
-            paymentsByMethod: []
-          }
+          tenant: { name: "EduSmart SN", id: 0 },
+          stats: { students: 0, enrollmentRate: "0%", totalRevenue: 0, paymentsByMethod: [] }
         });
       }
       targetTenantId = tenants[0].id;
     }
 
     const tenant = await query<any[]>('SELECT * FROM etablissements WHERE id = ?', [targetTenantId]);
-    const studentCount = await query<any[]>('SELECT COUNT(*) as count FROM etudiants WHERE etablissement_id = ? AND statut = "actif"', [targetTenantId]);
-    const payments = await query<any[]>('SELECT SUM(montant) as total, methode FROM paiements WHERE etablissement_id = ? AND statut = "SUCCESS" GROUP BY methode', [targetTenantId]);
+    
+    let studentCount = [{ count: 0 }];
+    try {
+      studentCount = await query<any[]>('SELECT COUNT(*) as count FROM etudiants WHERE etablissement_id = ? AND statut = "actif"', [targetTenantId]);
+    } catch (e) { console.error("Missing etudiants table?"); }
+
+    let payments: any[] = [];
+    try {
+      payments = await query<any[]>('SELECT SUM(montant) as total, methode FROM paiements WHERE etablissement_id = ? AND statut = "SUCCESS" GROUP BY methode', [targetTenantId]);
+    } catch (e) { console.error("Missing paiements table?"); }
     
     return NextResponse.json({
-      tenant: tenant[0],
+      tenant: tenant[0] || { name: "EduSmart University", id: targetTenantId },
       stats: {
         students: studentCount[0]?.count || 0,
         enrollmentRate: "95%",
