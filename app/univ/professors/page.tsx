@@ -153,7 +153,7 @@ export default function ProfessorsPage() {
       {/* Statistiques rapides */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Professeurs", value: "48", icon: Users, color: "bg-blue-500" },
+          { label: "Total Professeurs", value: "48", icon: Users, color: "bg-emerald-500" },
           { label: "Charges Horaires", value: "1,240h", icon: Calendar, color: "bg-emerald-500" },
           { label: "Départements", value: "8", icon: BookOpen, color: "bg-amber-500" },
           { label: "Taux Occupation", value: "88%", icon: TrendingUp, color: "bg-rose-500" },

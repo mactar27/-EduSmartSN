@@ -20,7 +20,7 @@ const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
 const HOURS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"]
 
 const MOCK_EVENTS = [
-  { day: "Lundi", start: "08:00", end: "10:00", subject: "Mathématiques", room: "Salle 102", prof: "Dr. Ba", color: "bg-blue-500" },
+  { day: "Lundi", start: "08:00", end: "10:00", subject: "Mathématiques", room: "Salle 102", prof: "Dr. Ba", color: "bg-emerald-500" },
   { day: "Lundi", start: "10:00", end: "12:00", subject: "Informatique", room: "Labo 1", prof: "M. Diallo", color: "bg-emerald-500" },
   { day: "Mardi", start: "14:00", end: "16:00", subject: "Anglais", room: "Salle 205", prof: "Mme. Sarr", color: "bg-amber-500" },
   { day: "Mercredi", start: "09:00", end: "12:00", subject: "Physique", room: "Amphi A", prof: "Dr. Ndoye", color: "bg-rose-500" },

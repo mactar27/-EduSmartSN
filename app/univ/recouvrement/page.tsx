@@ -69,10 +69,10 @@ export default function RecoveryDashboard() {
 
         <Card className="p-6 border-border rounded-[2rem] bg-card hover:shadow-xl transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
               <Users size={24} />
             </div>
-            <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">452</span>
+            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">452</span>
           </div>
           <p className="text-sm font-medium text-muted-foreground">Élèves à Jour</p>
           <h3 className="text-3xl font-black mt-1">78% <span className="text-sm font-bold opacity-50">Effectif</span></h3>
@@ -208,7 +208,7 @@ export default function RecoveryDashboard() {
                           <p className="text-[10px] text-muted-foreground">L1 Informatique</p>
                         </td>
                         <td className="px-8 py-5">
-                          <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded">MENSUALITÉ</span>
+                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded">MENSUALITÉ</span>
                         </td>
                         <td className="px-8 py-5 font-black text-primary">+15 000</td>
                         <td className="px-8 py-5">
@@ -247,7 +247,7 @@ export default function RecoveryDashboard() {
                           <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-primary border-primary/20 hover:bg-primary/5">
                             <Phone size={14} />
                           </Button>
-                          <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-blue-600 border-blue-100 hover:bg-blue-50">
+                          <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-emerald-600 border-emerald-100 hover:bg-emerald-50">
                             <MessageSquare size={14} />
                           </Button>
                         </td>

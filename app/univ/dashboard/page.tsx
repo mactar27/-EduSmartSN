@@ -47,7 +47,7 @@ function DashboardContent() {
   if (!data?.tenant) return <div className="p-10 text-center text-red-500">Aucun établissement trouvé dans la base.</div>;
 
   const stats = [
-    { label: "Élèves Inscrits", value: data.stats.students.toLocaleString(), icon: Users, bg: "bg-blue-50", color: "text-blue-600" },
+    { label: "Élèves Inscrits", value: data.stats.students.toLocaleString(), icon: Users, bg: "bg-emerald-50", color: "text-emerald-600" },
     { label: "Validation Dossiers", value: data.stats.enrollmentRate, icon: CheckCircle2, bg: "bg-primary/5", color: "text-primary" },
     { label: "Recettes Globales", value: `${data.stats.totalRevenue.toLocaleString()} F`, icon: Wallet, bg: "bg-amber-50", color: "text-amber-600" },
     { label: "Alertes Système", value: "0", icon: AlertCircle, bg: "bg-rose-50", color: "text-rose-600" },
@@ -104,7 +104,7 @@ function DashboardContent() {
                 <div key={i} className="flex justify-between items-center p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      payment.method === 'WAVE' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'
+                      payment.method === 'WAVE' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'
                     }`}>
                       {payment.method[0]}
                     </div>
