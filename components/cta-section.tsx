@@ -23,8 +23,8 @@ export function CTASection() {
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Téléphone</p>
-                  <a href="tel:+221770000000" className="text-muted-foreground hover:text-primary transition-colors">
-                    +221 77 000 00 00
+                  <a href="tel:+221773519128" className="text-muted-foreground hover:text-primary transition-colors">
+                    +221 77 351 91 28
                   </a>
                 </div>
               </div>
@@ -35,8 +35,8 @@ export function CTASection() {
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Email</p>
-                  <a href="mailto:contact@edusmart.sn" className="text-muted-foreground hover:text-primary transition-colors">
-                    contact@edusmart.sn
+                  <a href="mailto:ndiayeamadoumactar3@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                    ndiayeamadoumactar3@gmail.com
                   </a>
                 </div>
               </div>
