@@ -58,14 +58,14 @@ export function UnivSidebar() {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full p-6">
-          <div className="flex items-center gap-3 mb-12 px-2">
+          <div className="flex items-center gap-3 mb-16 px-2">
             <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/edusmart_transparent.png"
                 alt="EduSmart SN"
-                width={180}
-                height={50}
-                className="h-12 w-auto brightness-0 invert"
+                width={240}
+                height={80}
+                className="h-20 w-auto brightness-0 invert"
               />
             </Link>
           </div>
