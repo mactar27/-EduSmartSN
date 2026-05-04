@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function AdminPayments() {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
@@ -27,6 +28,21 @@ export default function AdminPayments() {
     ]);
     setIsLoading(false);
   }, []);
+
+  const handleConfirm = (id: string) => {
+    setSubscriptions(prev => prev.map(sub => 
+      sub.id === id ? { ...sub, status: 'PAID' } : sub
+    ));
+    toast.success("Paiement confirmé !", {
+      description: `L'accès pour l'abonnement ${id} a été activé.`,
+    });
+  };
+
+  const showDetails = (sub: any) => {
+    toast.info(`Détails: ${sub.tenant}`, {
+      description: `Montant: ${sub.amount.toLocaleString()} F | Contact: ${sub.contact}`,
+    });
+  };
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -142,11 +158,20 @@ export default function AdminPayments() {
                   </td>
                   <td className="px-8 py-6 text-right">
                     {sub.status === 'PENDING' ? (
-                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs">
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleConfirm(sub.id)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs"
+                      >
                         Confirmer Reçu
                       </Button>
                     ) : (
-                      <Button variant="ghost" size="sm" className="rounded-lg text-xs font-bold border border-border">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => showDetails(sub)}
+                        className="rounded-lg text-xs font-bold border border-border"
+                      >
                         Détails
                       </Button>
                     )}
