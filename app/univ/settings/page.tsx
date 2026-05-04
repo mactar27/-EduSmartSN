@@ -96,12 +96,12 @@ export default function UnivSettings() {
                   <div className="flex gap-4 items-center">
                     <input 
                       type="color" 
-                      value={tenant.primaryColor || "#059669"}
+                      value={tenant.primaryColor || "#4f46e5"}
                       onChange={(e) => setTenant({...tenant, primaryColor: e.target.value})}
                       className="w-16 h-16 rounded-xl cursor-pointer border-none p-0"
                     />
                     <Input 
-                      value={tenant.primaryColor || "#059669"}
+                      value={tenant.primaryColor || "#4f46e5"}
                       onChange={(e) => setTenant({...tenant, primaryColor: e.target.value})}
                       className="bg-muted/30 font-mono"
                     />
@@ -112,12 +112,12 @@ export default function UnivSettings() {
                   <div className="flex gap-4 items-center">
                     <input 
                       type="color" 
-                      value={tenant.secondaryColor || "#10b981"}
+                      value={tenant.secondaryColor || "#6366f1"}
                       onChange={(e) => setTenant({...tenant, secondaryColor: e.target.value})}
                       className="w-16 h-16 rounded-xl cursor-pointer border-none p-0"
                     />
                     <Input 
-                      value={tenant.secondaryColor || "#10b981"}
+                      value={tenant.secondaryColor || "#6366f1"}
                       onChange={(e) => setTenant({...tenant, secondaryColor: e.target.value})}
                       className="bg-muted/30 font-mono"
                     />
@@ -167,7 +167,7 @@ export default function UnivSettings() {
             {/* Mock Mobile Sidebar Preview */}
             <div className="bg-white rounded-[40px] border-[8px] border-[#1e1e1e] h-[600px] shadow-2xl overflow-hidden relative">
               <div className="h-full flex">
-                <div className="w-16 h-full flex flex-col items-center py-6 gap-6" style={{ backgroundColor: tenant.primaryColor || '#059669' }}>
+                <div className="w-16 h-full flex flex-col items-center py-6 gap-6" style={{ backgroundColor: tenant.primaryColor || '#4f46e5' }}>
                    <div className="w-8 h-8 bg-white/20 rounded-lg" />
                    <div className="w-8 h-8 bg-white/10 rounded-lg" />
                    <div className="w-8 h-8 bg-white/10 rounded-lg" />
@@ -180,7 +180,7 @@ export default function UnivSettings() {
                     <div className="h-4 w-full bg-muted rounded" />
                     <div className="h-4 w-2/3 bg-muted rounded" />
                   </div>
-                  <Button className="w-full h-10 rounded-xl font-bold text-xs" style={{ backgroundColor: tenant.primaryColor || '#059669' }}>
+                  <Button className="w-full h-10 rounded-xl font-bold text-xs" style={{ backgroundColor: tenant.primaryColor || '#4f46e5' }}>
                     Action Principal
                   </Button>
                 </div>

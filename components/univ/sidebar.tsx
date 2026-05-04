@@ -80,7 +80,7 @@ export function UnivSidebar() {
                 className={cn(
                    "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group",
                    pathname === item.href 
-                     ? "text-white shadow-md shadow-emerald-200" 
+                     ? "text-white shadow-md shadow-indigo-200" 
                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 style={pathname === item.href ? { backgroundColor: primaryColor } : {}}

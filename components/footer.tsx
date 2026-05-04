@@ -111,11 +111,6 @@ export function Footer() {
             <span className="text-xs sm:text-sm text-muted-foreground font-medium">Propulsé avec</span>
             <span className="text-destructive animate-pulse">❤️</span>
             <span className="text-xs sm:text-sm text-muted-foreground font-medium">au Sénégal</span>
-            <div className="flex gap-0 ml-1 shadow-sm rounded-sm overflow-hidden border border-black/5">
-              <span className="w-3 h-4 bg-[#00853f]" />
-              <span className="w-3 h-4 bg-[#fdef42] flex items-center justify-center text-[8px] leading-none text-[#00853f] font-black">★</span>
-              <span className="w-3 h-4 bg-[#e31b23]" />
-            </div>
           </div>
         </div>
       </div>

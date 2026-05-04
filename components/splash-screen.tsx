@@ -39,7 +39,7 @@ export function SplashScreen() {
 
         {/* Loading bar */}
         <div className="w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
-          <div className="h-full bg-primary animate-progress-fast shadow-[0_0_10px_rgba(5,150,105,0.5)]" />
+          <div className="h-full bg-primary animate-progress-fast shadow-[0_0_10px_rgba(79,70,229,0.5)]" />
         </div>
 
         {/* Sovereign tagline */}

@@ -63,7 +63,7 @@ export function PushNotificationManager() {
   return (
     <div className="bg-card border border-border p-6 rounded-3xl shadow-sm space-y-4">
       <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-2xl ${subscription ? 'bg-emerald-100 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
+        <div className={`p-3 rounded-2xl ${subscription ? 'bg-indigo-100 text-indigo-600' : 'bg-primary/10 text-primary'}`}>
           {subscription ? <CheckCircle2 size={24} /> : <Bell size={24} />}
         </div>
         <div className="flex-1">
