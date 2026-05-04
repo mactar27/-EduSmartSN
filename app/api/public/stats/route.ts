@@ -21,15 +21,11 @@ export async function GET() {
     // Default success rate if no data
     let successRate = Math.round(successResult[0].rate || 95) 
 
-    // Adjust values to be realistic if database is empty
-    const finalStudents = totalStudents > 0 ? totalStudents : 1250
-    const finalSuccess = successRate > 0 ? successRate : 98
-    const finalTenants = totalTenants > 0 ? totalTenants : 45
-
+    // Use real values from DB
     return NextResponse.json({
-      totalStudents: finalStudents,
-      successRate: finalSuccess,
-      totalTenants: finalTenants
+      totalStudents: totalStudents,
+      successRate: successRate,
+      totalTenants: totalTenants
     })
   } catch (error) {
     console.error("Error fetching public stats:", error)
