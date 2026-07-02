@@ -19,9 +19,10 @@ export default function UnivSettings() {
     try {
       const res = await fetch('/api/univ/stats') // Reusing stats API to get tenant info
       const data = await res.json()
-      setTenant(data.tenant)
+      setTenant(data.tenant || {})
     } catch (error) {
       console.error(error)
+      setTenant({})
     } finally {
       setIsLoading(false)
     }
