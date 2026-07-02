@@ -16,47 +16,46 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
+import useSWR from "swr"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
 const START_HOUR = 8
 const END_HOUR = 18
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => i + START_HOUR)
 
-// Improved Mock Events with exact times in minutes
-const MOCK_EVENTS = [
-  { 
-    id: 1, day: "Lundi", startTime: "08:00", endTime: "10:30", 
-    subject: "Mathématiques Appliquées", room: "Amphi 102", 
-    prof: "Dr. Ba", type: "CM",
-    color: "from-indigo-500 to-blue-600", shadow: "shadow-blue-500/30"
-  },
-  { 
-    id: 2, day: "Lundi", startTime: "11:00", endTime: "13:00", 
-    subject: "Algorithmique", room: "Labo 1", 
-    prof: "M. Diallo", type: "TD",
-    color: "from-emerald-400 to-emerald-600", shadow: "shadow-emerald-500/30"
-  },
-  { 
-    id: 3, day: "Mardi", startTime: "14:30", endTime: "17:00", 
-    subject: "Anglais Technique", room: "Salle 205", 
-    prof: "Mme. Sarr", type: "TD",
-    color: "from-amber-400 to-orange-500", shadow: "shadow-orange-500/30"
-  },
-  { 
-    id: 4, day: "Mercredi", startTime: "09:00", endTime: "12:00", 
-    subject: "Physique Quantique", room: "Amphi A", 
-    prof: "Dr. Ndoye", type: "CM",
-    color: "from-rose-400 to-red-600", shadow: "shadow-rose-500/30"
-  },
-  { 
-    id: 5, day: "Jeudi", startTime: "10:00", endTime: "12:00", 
-    subject: "Base de données", room: "Labo 3", 
-    prof: "Dr. Fall", type: "TP",
-    color: "from-violet-500 to-purple-600", shadow: "shadow-purple-500/30"
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
+// Fallback colors for Course Types
+const getTypeColor = (type: string) => {
+  switch (type) {
+    case 'CM': return { bg: "from-indigo-500 to-blue-600", shadow: "shadow-blue-500/30" }
+    case 'TD': return { bg: "from-emerald-400 to-emerald-600", shadow: "shadow-emerald-500/30" }
+    case 'TP': return { bg: "from-violet-500 to-purple-600", shadow: "shadow-purple-500/30" }
+    case 'EXAM': return { bg: "from-rose-500 to-red-600", shadow: "shadow-rose-500/30" }
+    default: return { bg: "from-amber-400 to-orange-500", shadow: "shadow-orange-500/30" }
   }
-]
+}
 
 export default function SchedulePage() {
   const [view, setView] = useState<"week" | "month">("week")
+  const [selectedClassId, setSelectedClassId] = useState<string>("")
+
+  // Fetch classes (departments)
+  const { data: deptData, isLoading: deptsLoading } = useSWR('/api/univ/departments', fetcher)
+  const departments = deptData?.data || []
+
+  // Initialize selectedClassId if empty and departments are loaded
+  if (!selectedClassId && departments.length > 0) {
+    setSelectedClassId(departments[0].id)
+  }
+
+  // Fetch events for the selected class
+  const { data: scheduleData, isLoading: scheduleLoading } = useSWR(
+    selectedClassId ? `/api/univ/schedule?departmentId=${selectedClassId}` : null,
+    fetcher
+  )
+  const events = scheduleData?.data || []
 
   // Function to calculate top and height based on time strings like "08:30"
   const getEventPosition = (start: string, end: string) => {
@@ -77,7 +76,7 @@ export default function SchedulePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Emploi du Temps</h2>
-          <p className="text-muted-foreground mt-1">Gestion dynamique et temps réel des plannings.</p>
+          <p className="text-muted-foreground mt-1">Gestion dynamique et temps réel des plannings par classe.</p>
         </div>
         <div className="flex gap-3">
            <Button variant="outline" className="h-12 rounded-xl gap-2 border-border shadow-sm bg-card hover:bg-muted/50">
@@ -93,18 +92,39 @@ export default function SchedulePage() {
 
       <Card className="border-border bg-card rounded-[2rem] overflow-hidden shadow-2xl shadow-slate-200/50">
         {/* Toolbar */}
-        <div className="p-6 border-b border-border bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 text-slate-600">
-              <ChevronLeft size={20} />
-            </Button>
-            <div className="flex items-center gap-2 px-4">
-              <CalendarIcon size={18} className="text-primary" />
-              <h3 className="text-sm font-black uppercase tracking-wider text-slate-700">15 - 21 Avril 2026</h3>
+        <div className="p-6 border-b border-border bg-slate-50/50 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+          
+          {/* Left: Class Selector & Date Navigation */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
+            {/* Class Selector */}
+            <div className="w-full sm:w-[250px]">
+              <Select value={selectedClassId} onValueChange={setSelectedClassId} disabled={deptsLoading}>
+                <SelectTrigger className="h-12 bg-white rounded-xl border-slate-200 shadow-sm font-bold">
+                  <SelectValue placeholder={deptsLoading ? "Chargement..." : "Sélectionner une classe"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept: any) => (
+                    <SelectItem key={dept.id} value={dept.id} className="font-medium">
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 text-slate-600">
-              <ChevronRight size={20} />
-            </Button>
+
+            {/* Date Navigation */}
+            <div className="flex items-center gap-4 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 w-full sm:w-auto justify-between">
+              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-600 h-9 w-9">
+                <ChevronLeft size={18} />
+              </Button>
+              <div className="flex items-center gap-2 px-2">
+                <CalendarIcon size={16} className="text-primary hidden sm:block" />
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-700 whitespace-nowrap">15 - 21 Avril 2026</h3>
+              </div>
+              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-600 h-9 w-9">
+                <ChevronRight size={18} />
+              </Button>
+            </div>
           </div>
 
           <div className="flex items-center bg-slate-200/50 p-1 rounded-xl">
@@ -174,13 +194,16 @@ export default function SchedulePage() {
                   ))}
                   
                   {/* Events for this day */}
-                  {MOCK_EVENTS.filter(e => e.day === day).map(event => {
+                  {events
+                    .filter((e: any) => DAYS[e.dayOfWeek - 1] === day)
+                    .map((event: any) => {
                     const { top, height } = getEventPosition(event.startTime, event.endTime)
+                    const styleConfig = getTypeColor(event.type)
                     
                     return (
                       <div 
                         key={event.id}
-                        className={`absolute left-1.5 right-1.5 rounded-2xl p-3 text-white shadow-lg transition-all hover:scale-[1.02] hover:-translate-y-1 cursor-pointer bg-gradient-to-br ${event.color} ${event.shadow}`}
+                        className={`absolute left-1.5 right-1.5 rounded-2xl p-3 text-white shadow-lg transition-all hover:scale-[1.02] hover:-translate-y-1 cursor-pointer bg-gradient-to-br ${styleConfig.bg} ${styleConfig.shadow}`}
                         style={{ top, height, zIndex: 10 }}
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -205,13 +228,15 @@ export default function SchedulePage() {
                             <MapPin size={12} className="opacity-70" /> 
                             {event.room}
                           </div>
-                          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
-                            <Avatar className="w-5 h-5 border border-white/30">
-                              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${event.prof}&backgroundColor=ffffff`} />
-                              <AvatarFallback className="text-[8px] text-black">PR</AvatarFallback>
-                            </Avatar>
-                            <span className="text-[10px] font-bold truncate text-white/90">{event.prof}</span>
-                          </div>
+                          {event.professor && (
+                            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
+                              <Avatar className="w-5 h-5 border border-white/30">
+                                <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${event.professor.user?.name || 'P'}&backgroundColor=ffffff`} />
+                                <AvatarFallback className="text-[8px] text-black">PR</AvatarFallback>
+                              </Avatar>
+                              <span className="text-[10px] font-bold truncate text-white/90">{event.professor.user?.name}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )

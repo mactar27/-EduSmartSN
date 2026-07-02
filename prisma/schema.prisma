@@ -46,6 +46,13 @@ enum PaymentMethod {
   PAYTECH_AUTO
 }
 
+enum CourseType {
+  CM
+  TD
+  TP
+  EXAM
+}
+
 model Tenant {
   id             String       @id @default(cuid())
   name           String
@@ -58,12 +65,13 @@ model Tenant {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  users         User[]
-  faculties     Faculty[]
-  academicYears AcademicYear[]
-  payments      Payment[]
-  students      Student[]
-  fees          Fee[]
+  users          User[]
+  faculties      Faculty[]
+  academicYears  AcademicYear[]
+  payments       Payment[]
+  students       Student[]
+  fees           Fee[]
+  scheduleEvents ScheduleEvent[]
 }
 
 model User {
@@ -100,11 +108,12 @@ model Student {
 }
 
 model Professor {
-  id             String  @id @default(cuid())
-  userId         String  @unique
-  user           User    @relation(fields: [userId], references: [id])
+  id             String          @id @default(cuid())
+  userId         String          @unique
+  user           User            @relation(fields: [userId], references: [id])
   specialization String?
   tenantId       String
+  scheduleEvents ScheduleEvent[]
 }
 
 model Faculty {
@@ -117,12 +126,13 @@ model Faculty {
 }
 
 model Department {
-  id            String           @id @default(cuid())
-  name          String
-  facultyId     String
-  faculty       Faculty          @relation(fields: [facultyId], references: [id])
-  unitOfTeaches UnitOfTeaching[]
-  enrollments   Enrollment[]
+  id             String           @id @default(cuid())
+  name           String
+  facultyId      String
+  faculty        Faculty          @relation(fields: [facultyId], references: [id])
+  unitOfTeaches  UnitOfTeaching[]
+  enrollments    Enrollment[]
+  scheduleEvents ScheduleEvent[]
 }
 
 model AcademicYear {
@@ -228,4 +238,22 @@ model PushSubscription {
   p256dh    String
   auth      String
   createdAt DateTime @default(now())
+}
+
+model ScheduleEvent {
+  id           String     @id @default(cuid())
+  subject      String
+  type         CourseType @default(CM)
+  room         String
+  professorId  String?
+  professor    Professor? @relation(fields: [professorId], references: [id])
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
