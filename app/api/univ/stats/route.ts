@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const tenantId = searchParams.get('tenantId');
 
-    // For demo, if no tenantId, get the first active tenant
     let targetTenantId = tenantId;
     if (!targetTenantId) {
       const firstTenant = await prisma.tenant.findFirst({
@@ -17,12 +16,19 @@ export async function GET(request: NextRequest) {
       });
       
       if (!firstTenant) {
-        return NextResponse.json({
-          tenant: { name: "EduSmart SN", id: "" },
-          stats: { students: 0, enrollmentRate: "0%", totalRevenue: 0, paymentsByMethod: [] }
+        // Auto-create a default tenant to unblock the UI if the database is fresh
+        const defaultTenant = await prisma.tenant.create({
+          data: {
+            name: "EduSmart SN",
+            subdomain: "edusmart-demo",
+            domain: "demo.edusmart.sn",
+            status: "ACTIVE"
+          }
         });
+        targetTenantId = defaultTenant.id;
+      } else {
+        targetTenantId = firstTenant.id;
       }
-      targetTenantId = firstTenant.id;
     }
 
     const tenant = await prisma.tenant.findUnique({

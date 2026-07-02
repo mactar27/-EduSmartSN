@@ -17,7 +17,9 @@ export function UnivHeader() {
 
       <div className="flex items-center gap-4 ml-auto">
         <div className="text-right hidden sm:block mr-2">
-          <p className="text-xs text-emerald-400/60 font-bold uppercase tracking-widest">28 Avril 2026</p>
+          <p className="text-xs text-emerald-400/60 font-bold uppercase tracking-widest">
+            {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
           <p className="text-sm font-bold text-white">Dakar, Sénégal</p>
         </div>
         
