@@ -12,7 +12,10 @@ import {
   MoreVertical, 
   BookOpen, 
   TrendingUp,
-  Calendar
+  Calendar,
+  X,
+  Save,
+  Building
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,10 +25,20 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function ProfessorsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    specialization: ""
+  });
   
-  const { data, error, isLoading } = useSWR('/api/univ/professors', fetcher)
-
+  const { data, error, isLoading, mutate } = useSWR('/api/univ/professors', fetcher)
+  const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
+  
   const professors = data?.data || [];
+  const departments = deptsData?.data || [];
   const stats = data?.stats || {
     totalProfessors: 0,
     totalHours: "0h",
@@ -39,14 +52,45 @@ export default function ProfessorsPage() {
     prof.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCreateProfessor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+
+    try {
+      const res = await fetch('/api/univ/professors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const json = await res.json();
+      
+      if (res.ok) {
+        alert(`Professeur créé avec succès !\n\nEmail: ${formData.email}\nMot de passe temporaire: ${json.tempPassword}`);
+        setFormData({ name: "", email: "", phone: "", specialization: "" });
+        setIsModalOpen(false);
+        mutate();
+      } else {
+        alert(`Erreur: ${json.error}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erreur lors de la création du professeur.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Corps Professoral</h2>
           <p className="text-muted-foreground mt-1">Gérez vos enseignants et leurs attributions pédagogiques.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
+        <Button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20"
+        >
           <Plus size={18} />
           Ajouter un Professeur
         </Button>
@@ -157,6 +201,79 @@ export default function ProfessorsPage() {
           </Card>
         ))}
       </div>
+
+      {/* Modal Ajout Professeur */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card border border-border w-full max-w-lg rounded-3xl shadow-2xl p-8 relative animate-in slide-in-from-bottom-4">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors"
+            >
+              <X size={20} className="text-foreground" />
+            </button>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold">Ajouter un Professeur</h3>
+              <p className="text-muted-foreground mt-1">Créez le profil et envoyez les accès.</p>
+            </div>
+            <form onSubmit={handleCreateProfessor} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold">Nom Complet</label>
+                <Input 
+                  placeholder="Ex: Dr. Moussa Diop" 
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="h-12 rounded-xl bg-muted/30"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold">Adresse Email</label>
+                <Input 
+                  type="email"
+                  placeholder="Ex: m.diop@edusmart.sn" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="h-12 rounded-xl bg-muted/30"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold">Téléphone (Optionnel)</label>
+                  <Input 
+                    placeholder="Ex: 77 000 00 00" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="h-12 rounded-xl bg-muted/30"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold">Département (Spécialisation)</label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                    <select
+                      className="w-full h-12 pl-10 pr-4 bg-muted/30 border border-input rounded-xl appearance-none text-sm"
+                      value={formData.specialization}
+                      onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                      required
+                    >
+                      <option value="">Sélectionner</option>
+                      {departments.map((d: any) => (
+                        <option key={d.id} value={d.name}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <Button type="submit" disabled={isCreating} className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg shadow-lg shadow-primary/20 gap-2 mt-4">
+                <Save size={20} />
+                {isCreating ? 'Enregistrement...' : 'Valider le professeur'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

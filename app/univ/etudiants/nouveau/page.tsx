@@ -2,10 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import useSWR from "swr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ArrowLeft, Save, UserCircle } from "lucide-react"
+import { ArrowLeft, Save, UserCircle, Building } from "lucide-react"
 import Link from "next/link"
+
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function NewStudentPage() {
   const router = useRouter()
@@ -19,6 +22,14 @@ export default function NewStudentPage() {
   })
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
+  const departments = deptsData?.data || []
+
+  // Ensure department is set to the first one by default if not set
+  if (departments.length > 0 && !formData.department) {
+    setFormData(prev => ({ ...prev, department: departments[0].name }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -109,20 +120,31 @@ export default function NewStudentPage() {
               className="rounded-xl h-12 bg-muted/30"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-bold">Département / Faculté</label>
-            <Input 
-              value={formData.department}
-              onChange={(e) => setFormData({...formData, department: e.target.value})}
-              placeholder="Ex: Informatique" 
-              className="rounded-xl h-12 bg-muted/30"
-            />
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-bold">Classe / Département</label>
+            <div className="relative">
+               <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+               <select 
+                 className="w-full h-12 pl-10 pr-4 bg-muted/30 border-border rounded-xl appearance-none"
+                 value={formData.department}
+                 onChange={(e) => setFormData({...formData, department: e.target.value})}
+                 required
+               >
+                  {departments.length === 0 ? (
+                    <option value="">Aucune classe trouvée</option>
+                  ) : (
+                    departments.map((d: any) => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))
+                  )}
+               </select>
+            </div>
           </div>
         </div>
 
         <Button 
           type="submit" 
-          disabled={isLoading}
+          disabled={isLoading || departments.length === 0}
           className="w-full h-14 bg-primary hover:bg-primary/90 text-white text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 gap-2 mt-4"
         >
           <Save size={20} />

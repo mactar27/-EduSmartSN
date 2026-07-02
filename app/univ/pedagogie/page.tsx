@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import useSWR from "swr"
-import { BookOpen, Plus, Search, BookCheck, GraduationCap, ChevronRight, Building } from "lucide-react"
+import { BookOpen, Plus, Search, BookCheck, GraduationCap, ChevronRight, Building, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -11,22 +11,48 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function LMDManagement() {
   const [selectedDept, setSelectedDept] = useState("all")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [newClassName, setNewClassName] = useState("")
+  const [isCreating, setIsCreating] = useState(false)
 
-  const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
+  const { data: deptsData, mutate: mutateDepts } = useSWR('/api/univ/departments', fetcher)
   const departments = deptsData?.data || []
 
   const { data: coursData, isLoading } = useSWR(`/api/cours?filiere=${selectedDept !== 'all' ? encodeURIComponent(selectedDept) : ''}`, fetcher)
   const subjects = coursData?.data || []
 
+  const handleCreateClass = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newClassName.trim()) return
+
+    setIsCreating(true)
+    try {
+      const res = await fetch('/api/univ/departments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newClassName })
+      })
+
+      if (res.ok) {
+        alert("Classe créée avec succès !")
+        setNewClassName("")
+        setIsModalOpen(false)
+        mutateDepts() // Rafraîchir la liste des classes
+      } else {
+        const errorData = await res.json()
+        alert(`Erreur: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error(error)
+      alert("Une erreur est survenue lors de la création de la classe.")
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   // Group subjects by UE
   const uesMap = new Map()
   subjects.forEach((sub: any) => {
-    // In our simplified API we don't return UE details directly, but we can group them
-    // Wait, the API returns subjects, let's group by "etablissement_name" or "filiere" 
-    // Ideally we'd have ue_name, but since we didn't add it in API, let's fake the UE grouping based on code prefix or just group all subjects under one UE for demo if needed.
-    // Let's modify the grouping logic to group by a fake UE or if the subject has UE info.
-    // The subject API returns: id, code, name, credits, coefficient, etablissement_name, filiere.
-    // We'll group them under one "UE de " + filiere for the UI.
     const ueKey = sub.filiere || 'Général'
     if (!uesMap.has(ueKey)) {
       uesMap.set(ueKey, {
@@ -51,7 +77,15 @@ export default function LMDManagement() {
           <h2 className="text-3xl font-bold tracking-tight">Gestion Pédagogique (LMD)</h2>
           <p className="text-muted-foreground mt-1">Configurez les Unités d'Enseignement (UE) et les Matières (EC).</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
+          <Button 
+            onClick={() => setIsModalOpen(true)}
+            variant="outline" 
+            className="h-12 rounded-xl gap-2 font-bold border-primary text-primary hover:bg-primary/5"
+          >
+            <Plus size={20} />
+            Nouvelle Classe
+          </Button>
           <div className="relative w-64">
              <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
              <select 
@@ -163,6 +197,39 @@ export default function LMDManagement() {
            </Card>
         </div>
       </div>
+
+      {/* Modal Nouvelle Classe */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card border border-border w-full max-w-md rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom-4">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors"
+            >
+              <X size={20} className="text-foreground" />
+            </button>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold">Nouvelle Classe</h3>
+              <p className="text-muted-foreground text-sm">Créez une nouvelle filière ou département.</p>
+            </div>
+            <form onSubmit={handleCreateClass} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Nom de la Classe</label>
+                <Input 
+                  placeholder="Ex: Licence 1 Informatique" 
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
+                  className="h-12 rounded-xl bg-muted/30"
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={isCreating} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20">
+                {isCreating ? 'Création...' : 'Créer la classe'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
