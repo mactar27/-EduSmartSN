@@ -37,6 +37,21 @@ export default function StudentListPage() {
     s.department?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const handleExportCSV = () => {
+    const rows = [
+      ['Nom', 'Email', 'Matricule', 'Département', 'Statut'],
+      ...filteredStudents.map((s: any) => [s.name, s.email, s.studentId, s.department, s.statut])
+    ]
+    const csv = rows.map(r => r.map((v: string) => `"${v || ''}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `etudiants_${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -134,7 +149,7 @@ export default function StudentListPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="h-12 rounded-xl px-6 font-bold border-border gap-2">
+        <Button variant="outline" className="h-12 rounded-xl px-6 font-bold border-border gap-2" onClick={handleExportCSV}>
           <Printer size={18} />
           Impression Groupée
         </Button>

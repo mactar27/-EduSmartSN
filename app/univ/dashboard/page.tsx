@@ -11,6 +11,7 @@ import {
   GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function UnivDashboard() {
   return (
@@ -66,13 +67,17 @@ function DashboardContent() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-xl gap-2 font-bold h-12 border-border">
-            <QrCode size={20} />
-            Scanner Carte
-          </Button>
-          <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl font-bold h-12 shadow-lg shadow-primary/20 transition-transform hover:scale-105">
-            Nouvelle Inscription
-          </Button>
+          <Link href="/univ/etudiants">
+            <Button variant="outline" className="rounded-xl gap-2 font-bold h-12 border-border">
+              <QrCode size={20} />
+              Scanner Carte
+            </Button>
+          </Link>
+          <Link href="/univ/etudiants/nouveau">
+            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl font-bold h-12 shadow-lg shadow-primary/20 transition-transform hover:scale-105">
+              Nouvelle Inscription
+            </Button>
+          </Link>
         </div>
       </div>
 

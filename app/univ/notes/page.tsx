@@ -22,6 +22,7 @@ export default function GradeEntry() {
   const [selectedSubject, setSelectedSubject] = useState("")
   const [localGrades, setLocalGrades] = useState<Record<string, string>>({})
   const [isSaving, setIsSaving] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
   const departments = deptsData?.data || []
@@ -104,9 +105,15 @@ export default function GradeEntry() {
           <p className="text-muted-foreground mt-1">Interface de saisie rapide pour les professeurs.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-xl gap-2 border-border h-12">
+          <input type="file" id="excel-import" accept=".csv" className="hidden" onChange={handleImportExcel} />
+          <Button
+            variant="outline"
+            className="rounded-xl gap-2 border-border h-12"
+            disabled={isImporting}
+            onClick={() => document.getElementById('excel-import')?.click()}
+          >
             <Upload size={18} />
-            Import Excel
+            {isImporting ? 'Import...' : 'Import CSV'}
           </Button>
           <Button 
             onClick={handleSave}
