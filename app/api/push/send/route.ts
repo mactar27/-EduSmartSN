@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
           auth: sub.auth
         }
       };
-      return webpush.sendNotification(pushSubscription, payload).catch(async err => {
+      return webpush.sendNotification(pushSubscription, payload).catch(async (err: any) => {
         console.error('Error sending push:', err);
         // Clean up invalid subscriptions
         if (err.statusCode === 410) {

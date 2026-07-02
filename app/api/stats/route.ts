@@ -16,7 +16,7 @@ export async function GET() {
 
     const paymentsAggregation = await prisma.payment.aggregate({
       where: {
-        status: 'PAID',
+        status: 'SUCCESS',
         createdAt: { gte: thirtyDaysAgo }
       },
       _sum: {

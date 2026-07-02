@@ -33,14 +33,18 @@ export default function RecoveryDashboard() {
   const { data: statsData, isLoading: statsLoading } = useSWR('/api/stats', fetcher)
 
   const payments = paymentsData?.data || []
-  const totalEncaissé = statsData?.paiements_mois || 0
   
-  // Calculate total from all complete payments in fetched data just in case
-  const totalSum = payments.reduce((acc: number, p: any) => acc + (p.statut === 'complete' ? Number(p.montant) : 0), 0)
-  const displayTotal = totalEncaissé > 0 ? totalEncaissé : totalSum
+  const univStats = statsData?.stats || {}
+  const totalEncaissé = univStats.totalRevenue || 0
+  const resteARecouvrer = univStats.reste_a_recouvrer || 0
+  const elevesAJourPercent = univStats.eleves_a_jour_percent || 0
+  const soldePaytech = univStats.solde_paytech || 0
+  const impayesList = univStats.impayes || []
+
+  const displayTotal = totalEncaissé
 
   const filteredPayments = payments.filter((p: any) => 
-    p.etudiant_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.reference?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -144,7 +148,7 @@ export default function RecoveryDashboard() {
             <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded-full">-3%</span>
           </div>
           <p className="text-sm font-medium text-muted-foreground">Reste à Recouvrer</p>
-          <h3 className="text-3xl font-black mt-1">2 120 000 <span className="text-sm font-bold opacity-50">FCFA</span></h3>
+          <h3 className="text-3xl font-black mt-1">{new Intl.NumberFormat('fr-FR').format(resteARecouvrer)} <span className="text-sm font-bold opacity-50">FCFA</span></h3>
         </Card>
 
         <Card className="p-6 border-border rounded-[2rem] bg-card hover:shadow-xl transition-all group">
@@ -152,10 +156,10 @@ export default function RecoveryDashboard() {
             <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
               <Users size={24} />
             </div>
-            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">452</span>
+            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{univStats.eleves_a_jour || 0}</span>
           </div>
           <p className="text-sm font-medium text-muted-foreground">Élèves à Jour</p>
-          <h3 className="text-3xl font-black mt-1">78% <span className="text-sm font-bold opacity-50">Effectif</span></h3>
+          <h3 className="text-3xl font-black mt-1">{elevesAJourPercent}% <span className="text-sm font-bold opacity-50">Effectif</span></h3>
         </Card>
 
         <Card className="p-6 border-border rounded-[2rem] bg-primary text-white shadow-lg shadow-primary/30">
@@ -165,7 +169,7 @@ export default function RecoveryDashboard() {
             </div>
           </div>
           <p className="text-sm font-medium text-white/70">Solde Disponible (PayTech)</p>
-          <h3 className="text-3xl font-black mt-1">4 215 500 <span className="text-sm font-bold opacity-70">FCFA</span></h3>
+          <h3 className="text-3xl font-black mt-1">{new Intl.NumberFormat('fr-FR').format(soldePaytech)} <span className="text-sm font-bold opacity-70">FCFA</span></h3>
         </Card>
       </div>
 
@@ -192,13 +196,13 @@ export default function RecoveryDashboard() {
                   stroke="currentColor"
                   strokeWidth="12"
                   strokeDasharray={2 * Math.PI * 80}
-                  strokeDashoffset={2 * Math.PI * 80 * (1 - 0.78)}
+                  strokeDashoffset={2 * Math.PI * 80 * (1 - (elevesAJourPercent / 100))}
                   strokeLinecap="round"
                   className="text-primary transition-all duration-1000 ease-out"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-primary">78%</span>
+                <span className="text-4xl font-black text-primary">{elevesAJourPercent}%</span>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Global</span>
               </div>
             </div>
@@ -322,7 +326,7 @@ export default function RecoveryDashboard() {
                                     <img src="/wave.png" alt="Wave" />
                                   </div>
                                 )}
-                                <span className="text-xs font-bold uppercase">{p.methode || 'N/A'}</span>
+                                <span className="text-xs font-bold uppercase">{p.method || 'N/A'}</span>
                               </div>
                             </td>
                           </tr>
@@ -343,15 +347,20 @@ export default function RecoveryDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {/* Impayés - Keep this mock for now until we have an impayés route */}
-                    {[1,2,3].map((i) => (
-                      <tr key={i} className="hover:bg-rose-50/30 transition-colors">
-                        <td className="px-8 py-5 font-bold text-sm">Abdoulaye Diop</td>
-                        <td className="px-8 py-5 text-xs">M2 Marketing</td>
-                        <td className="px-8 py-5">
-                          <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">12 JOURS</span>
+                    {impayesList.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-8 py-8 text-center text-muted-foreground">
+                          Aucun impayé
                         </td>
-                        <td className="px-8 py-5 font-black text-rose-600">30 000 CFA</td>
+                      </tr>
+                    ) : impayesList.map((imp: any) => (
+                      <tr key={imp.id} className="hover:bg-rose-50/30 transition-colors">
+                        <td className="px-8 py-5 font-bold text-sm">{imp.name}</td>
+                        <td className="px-8 py-5 text-xs">{imp.department}</td>
+                        <td className="px-8 py-5">
+                          <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">{imp.delay}</span>
+                        </td>
+                        <td className="px-8 py-5 font-black text-rose-600">{new Intl.NumberFormat('fr-FR').format(imp.reste)} CFA</td>
                         <td className="px-8 py-5 flex gap-2">
                           <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg text-primary border-primary/20 hover:bg-primary/5">
                             <Phone size={14} />
