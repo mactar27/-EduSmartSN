@@ -22,8 +22,15 @@ export async function GET(request: NextRequest) {
       tenantId = tenant.id;
     }
 
+    const filiere = searchParams.get('filiere');
+    const whereClause: any = { tenantId };
+    
+    if (filiere && filiere !== 'all') {
+      whereClause.department = filiere;
+    }
+
     const students = await prisma.student.findMany({
-      where: { tenantId },
+      where: whereClause,
       include: { user: true },
       orderBy: { name: 'asc' }
     });

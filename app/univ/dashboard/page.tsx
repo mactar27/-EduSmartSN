@@ -43,8 +43,8 @@ function DashboardContent() {
     }
   };
 
-  if (isLoading) return <div className="p-10 text-center">Chargement des données réelles...</div>;
-  if (!data?.tenant) return <div className="p-10 text-center text-red-500">Aucun établissement trouvé dans la base.</div>;
+  if (isLoading) return <div className="p-10 text-center text-muted-foreground font-medium">Chargement des statistiques...</div>;
+  if (!data?.tenant) return <div className="p-10 text-center text-red-500 font-bold">Aucun établissement trouvé dans la base.</div>;
 
   const stats = [
     { label: "Élèves Inscrits", value: data.stats.students.toLocaleString(), icon: Users, bg: "bg-emerald-50", color: "text-emerald-600" },
@@ -66,7 +66,7 @@ function DashboardContent() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-xl gap-2 font-bold h-12">
+          <Button variant="outline" className="rounded-xl gap-2 font-bold h-12 border-border">
             <QrCode size={20} />
             Scanner Carte
           </Button>
@@ -104,9 +104,9 @@ function DashboardContent() {
                 <div key={i} className="flex justify-between items-center p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      payment.method === 'WAVE' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'
+                      payment.method === 'WAVE' ? 'bg-[#00AEEF]/20 text-[#00AEEF]' : 'bg-orange-100 text-orange-600'
                     }`}>
-                      {payment.method[0]}
+                      {payment.method === 'WAVE' ? 'W' : payment.method[0]}
                     </div>
                     <div>
                       <p className="font-bold">{payment.method}</p>
@@ -130,14 +130,14 @@ function DashboardContent() {
               <div className="w-2 h-2 rounded-full bg-primary mt-2 animate-pulse" />
               <div>
                 <p className="font-bold">Inscriptions de l'Année Académique</p>
-                <p className="text-sm text-muted-foreground">En cours de traitement dans votre base de données.</p>
+                <p className="text-sm text-muted-foreground">{data.stats.students} étudiants actifs dans votre base de données.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 p-4 border border-border/50 rounded-xl opacity-60">
+            <div className="flex items-start gap-4 p-4 border border-border/50 rounded-xl hover:border-amber-500 transition-colors">
               <div className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
               <div>
                 <p className="font-bold">Saisie des Notes LMD</p>
-                <p className="text-sm text-muted-foreground italic">Module prêt pour l'intégration des fichiers Excel.</p>
+                <p className="text-sm text-muted-foreground">Le module de saisie des notes par classe est opérationnel.</p>
               </div>
             </div>
           </div>
@@ -146,3 +146,4 @@ function DashboardContent() {
     </div>
   );
 }
+

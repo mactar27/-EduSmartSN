@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import useSWR from "swr"
 import { 
   FileSpreadsheet, 
   Save, 
@@ -8,57 +9,69 @@ import {
   Search, 
   UserCircle, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  Building
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
+
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function GradeEntry() {
-  const [students, setStudents] = useState<any[]>([])
-  const [selectedSubject, setSelectedSubject] = useState("INF1011")
+  const [selectedDept, setSelectedDept] = useState("all")
+  const [selectedSubject, setSelectedSubject] = useState("")
+  const [localGrades, setLocalGrades] = useState<Record<string, string>>({})
   const [isSaving, setIsSaving] = useState(false)
 
+  const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
+  const departments = deptsData?.data || []
+
+  const { data: subjectsData } = useSWR(`/api/cours?filiere=${selectedDept !== 'all' ? encodeURIComponent(selectedDept) : ''}`, fetcher)
+  const subjects = subjectsData?.data || []
+
+  const { data: studentsData } = useSWR(`/api/univ/students?filiere=${selectedDept !== 'all' ? encodeURIComponent(selectedDept) : ''}`, fetcher)
+  const students = studentsData?.data || []
+
+  // Ensure first subject is selected when subjects load
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const res = await fetch(`/api/univ/students?subjectId=${selectedSubject}`)
-        const data = await res.json()
-        if (data.data) {
-          const formattedStudents = data.data.map((s: any) => ({
-            ...s,
-            grade: s.grade !== null && s.grade !== undefined ? s.grade.toString() : ""
-          }))
-          setStudents(formattedStudents)
-        }
-      } catch (e) {
-        console.error("Erreur chargement étudiants:", e)
-      }
+    if (subjects.length > 0 && (!selectedSubject || !subjects.find((s: any) => s.id === selectedSubject))) {
+      setSelectedSubject(subjects[0].id)
     }
-    fetchStudents()
-  }, [selectedSubject])
+  }, [subjects, selectedSubject])
 
   const handleGradeChange = (id: string, value: string) => {
     const numValue = parseFloat(value)
     if (value !== "" && (isNaN(numValue) || numValue < 0 || numValue > 20)) return
     
-    setStudents(prev => prev.map(s => s.id === id ? { ...s, grade: value } : s))
+    setLocalGrades(prev => ({ ...prev, [id]: value }))
   }
 
   const handleSave = async () => {
+    if (!selectedSubject) {
+      alert("Veuillez sélectionner une matière d'abord.")
+      return
+    }
+
     setIsSaving(true)
     
     try {
-      // Sauvegarde réelle des notes
+      const gradesToSave = Object.keys(localGrades).map(studentId => ({
+        studentId,
+        value: parseFloat(localGrades[studentId])
+      })).filter(g => !isNaN(g.value))
+
+      if (gradesToSave.length === 0) {
+        alert("Aucune note valide à enregistrer.")
+        setIsSaving(false)
+        return
+      }
+
       await fetch('/api/univ/grades/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subjectId: selectedSubject,
-          grades: students.filter(s => s.grade !== "").map(s => ({
-            studentId: s.id,
-            value: parseFloat(s.grade)
-          }))
+          grades: gradesToSave
         })
       })
 
@@ -74,6 +87,7 @@ export default function GradeEntry() {
       })
       
       alert("Notes enregistrées et notifications envoyées ! 🚀")
+      setLocalGrades({}) // Reset after save
     } catch (e) {
       console.error(e)
       alert("Erreur lors de l'enregistrement.")
@@ -106,6 +120,25 @@ export default function GradeEntry() {
       </div>
 
       <div className="bg-card border border-border rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center">
+        <div className="w-full md:w-1/3 space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Département / Filière</label>
+          <div className="relative">
+             <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+             <select 
+               className="w-full h-12 pl-12 pr-4 bg-muted/30 border-none rounded-xl appearance-none font-bold"
+               value={selectedDept}
+               onChange={(e) => {
+                 setSelectedDept(e.target.value)
+                 setLocalGrades({}) // Reset grades when changing department
+               }}
+             >
+                <option value="all">Tous les départements</option>
+                {departments.map((d: any) => (
+                  <option key={d.id} value={d.name}>{d.name}</option>
+                ))}
+             </select>
+          </div>
+        </div>
         <div className="flex-1 w-full space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Matière (EC)</label>
           <div className="relative">
@@ -115,9 +148,10 @@ export default function GradeEntry() {
                value={selectedSubject}
                onChange={(e) => setSelectedSubject(e.target.value)}
              >
-                <option value="INF1011">Programmation C (UE-INF-101)</option>
-                <option value="INF1012">Structure de Données (UE-INF-101)</option>
-                <option value="LAN1011">Anglais Technique (UE-LAN-101)</option>
+                {subjects.length === 0 && <option value="">Aucune matière disponible</option>}
+                {subjects.map((s: any) => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
+                ))}
              </select>
           </div>
         </div>
@@ -141,44 +175,52 @@ export default function GradeEntry() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {students.map((student) => (
-                <tr key={student.id} className="group hover:bg-muted/30 transition-colors">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
-                        {student.name.substring(0, 2).toUpperCase()}
-                      </div>
-                      <p className="font-bold text-sm">{student.name}</p>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5">
-                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">{student.matricule}</span>
-                  </td>
-                  <td className="px-8 py-5">
-                    <Input 
-                      value={student.grade}
-                      onChange={(e) => handleGradeChange(student.id, e.target.value)}
-                      placeholder="--"
-                      className="h-12 text-center text-lg font-black bg-muted/20 border-none focus-visible:ring-primary rounded-xl"
-                    />
-                  </td>
-                  <td className="px-8 py-5">
-                    {student.grade !== "" ? (
-                      parseFloat(student.grade) >= 10 ? (
-                        <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-wider">
-                          <CheckCircle2 size={16} /> Validé
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-wider">
-                          <AlertCircle size={16} /> Échec
-                        </div>
-                      )
-                    ) : (
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">En attente</span>
-                    )}
-                  </td>
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-8 py-10 text-center text-muted-foreground">Aucun élève trouvé.</td>
                 </tr>
-              ))}
+              ) : students.map((student: any) => {
+                const grade = localGrades[student.id] !== undefined ? localGrades[student.id] : "";
+                
+                return (
+                  <tr key={student.id} className="group hover:bg-muted/30 transition-colors">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                          {student.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <p className="font-bold text-sm">{student.name}</p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className="font-mono text-xs bg-muted px-2 py-1 rounded">{student.studentId || 'N/A'}</span>
+                    </td>
+                    <td className="px-8 py-5">
+                      <Input 
+                        value={grade}
+                        onChange={(e) => handleGradeChange(student.id, e.target.value)}
+                        placeholder="--"
+                        className="h-12 text-center text-lg font-black bg-muted/20 border-none focus-visible:ring-primary rounded-xl"
+                      />
+                    </td>
+                    <td className="px-8 py-5">
+                      {grade !== "" ? (
+                        parseFloat(grade) >= 10 ? (
+                          <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-wider">
+                            <CheckCircle2 size={16} /> Validé
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-wider">
+                            <AlertCircle size={16} /> Échec
+                          </div>
+                        )
+                      ) : (
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">En attente</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -192,3 +234,4 @@ export default function GradeEntry() {
     </div>
   )
 }
+

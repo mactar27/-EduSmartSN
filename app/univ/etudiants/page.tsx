@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import useSWR from "swr"
 import { 
   Users, 
   UserPlus, 
@@ -9,53 +10,42 @@ import {
   MoreVertical, 
   Printer,
   ChevronRight,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Building
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import Image from "next/image"
 
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export default function StudentListPage() {
-  const [students, setStudents] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [selectedDept, setSelectedDept] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isImporting, setIsImporting] = useState(false)
 
-  useEffect(() => {
-    fetchStudents()
-  }, [])
+  const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
+  const departments = deptsData?.data || []
 
-  const fetchStudents = async () => {
-    try {
-      const res = await fetch('/api/univ/students')
-      const data = await res.json()
-      
-      if (data.error) {
-        console.error("API Error Details:", data);
-        alert(`Diagnostic : ${data.error} \nDétails: ${data.details || data.message}`);
-      }
+  const { data: studentsData, isLoading, mutate } = useSWR(`/api/univ/students?filiere=${selectedDept !== 'all' ? encodeURIComponent(selectedDept) : ''}`, fetcher)
+  const students = studentsData?.data || []
 
-      if (data.data) {
-        setStudents(data.data)
-      } else {
-        setStudents([])
-      }
-    } catch (error) {
-      console.error("Failed to fetch students:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const filteredStudents = students.filter((s: any) => 
+    s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    s.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.department?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsLoading(true);
+    setIsImporting(true);
     const reader = new FileReader();
     reader.onload = async (event) => {
       const csv = event.target?.result as string;
       const lines = csv.split('\n');
-      const headers = lines[0].split(',');
       
       const data = lines.slice(1).map(line => {
         const values = line.split(',');
@@ -63,7 +53,7 @@ export default function StudentListPage() {
           name: values[0],
           email: values[1],
           studentId: values[2] || `SN-${Math.random().toString(36).slice(-5).toUpperCase()}`,
-          department: values[3] || 'Général'
+          department: values[3] || (selectedDept !== 'all' ? selectedDept : 'Général')
         };
       }).filter(item => item.name);
 
@@ -76,13 +66,13 @@ export default function StudentListPage() {
 
         if (res.ok) {
           alert(`${data.length} élèves importés avec succès !`);
-          fetchStudents();
+          mutate(); // re-fetch students
         }
       } catch (err) {
         console.error(err);
         alert("Erreur lors de l'importation.");
       } finally {
-        setIsLoading(false);
+        setIsImporting(false);
       }
     };
     reader.readAsText(file);
@@ -105,11 +95,12 @@ export default function StudentListPage() {
           />
           <Button 
             variant="outline" 
+            disabled={isImporting}
             className="h-12 rounded-xl gap-2 font-bold border-primary text-primary hover:bg-primary/5"
             onClick={() => document.getElementById('csv-import')?.click()}
           >
             <FileSpreadsheet size={20} />
-            Import CSV
+            {isImporting ? 'Importation...' : 'Import CSV'}
           </Button>
           <Link href="/univ/etudiants/nouveau">
             <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
@@ -121,9 +112,27 @@ export default function StudentListPage() {
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full md:max-w-xs">
+           <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+           <select 
+             className="w-full h-12 pl-10 pr-4 bg-muted/30 border-border rounded-xl appearance-none font-bold"
+             value={selectedDept}
+             onChange={(e) => setSelectedDept(e.target.value)}
+           >
+              <option value="all">Toutes les classes</option>
+              {departments.map((d: any) => (
+                <option key={d.id} value={d.name}>{d.name}</option>
+              ))}
+           </select>
+        </div>
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-          <Input className="pl-10 h-12 bg-muted/30 border-border rounded-xl" placeholder="Rechercher par nom, matricule ou département..." />
+          <Input 
+            className="pl-10 h-12 bg-muted/30 border-border rounded-xl" 
+            placeholder="Rechercher par nom, matricule ou département..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <Button variant="outline" className="h-12 rounded-xl px-6 font-bold border-border gap-2">
           <Printer size={18} />
@@ -133,19 +142,21 @@ export default function StudentListPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          <div className="col-span-full py-20 text-center">Chargement des élèves réels...</div>
-        ) : students.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-muted-foreground font-medium">Chargement des élèves...</div>
+        ) : filteredStudents.length === 0 ? (
           <div className="col-span-full py-20 text-center space-y-4">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto text-muted-foreground">
               <Users size={40} />
             </div>
-            <p className="text-muted-foreground italic">Aucun élève inscrit pour le moment.</p>
-            <Link href="/univ/etudiants/nouveau">
-              <Button variant="link" className="text-primary font-bold">Inscrire votre premier élève</Button>
-            </Link>
+            <p className="text-muted-foreground italic">Aucun élève trouvé pour cette sélection.</p>
+            {searchTerm === "" && (
+              <Link href="/univ/etudiants/nouveau">
+                <Button variant="link" className="text-primary font-bold">Inscrire un premier élève</Button>
+              </Link>
+            )}
           </div>
         ) : (
-          students.map((student) => (
+          filteredStudents.map((student: any) => (
             <div key={student.id} className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all group">
               <div className="p-6 space-y-4">
                 <div className="flex items-center gap-4">
@@ -173,7 +184,7 @@ export default function StudentListPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Statut</span>
-                    <span className="text-primary font-bold bg-primary/5 px-2 py-0.5 rounded-lg text-[10px] uppercase">Actif</span>
+                    <span className="text-primary font-bold bg-primary/5 px-2 py-0.5 rounded-lg text-[10px] uppercase">{student.statut || "Actif"}</span>
                   </div>
                 </div>
 
