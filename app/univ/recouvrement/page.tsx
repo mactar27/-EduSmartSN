@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import useSWR from "swr"
+import useSWR, { mutate } from "swr"
 import { 
   TrendingUp, 
   Users, 
@@ -15,7 +15,8 @@ import {
   MessageSquare,
   AlertCircle,
   CreditCard,
-  Wallet
+  Wallet,
+  Zap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -26,6 +27,7 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 export default function RecoveryDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [searchTerm, setSearchTerm] = useState("")
+  const [isSimulating, setIsSimulating] = useState(false)
 
   const { data: paymentsData, isLoading: paymentsLoading } = useSWR('/api/paiements', fetcher)
   const { data: statsData, isLoading: statsLoading } = useSWR('/api/stats', fetcher)
@@ -50,6 +52,46 @@ export default function RecoveryDashboard() {
     }
   }
 
+  const handleSimulatePaytech = async () => {
+    setIsSimulating(true)
+    try {
+      // 1. Initialiser le paiement
+      const initRes = await fetch('/api/univ/payments/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // On mock un étudiant pour la démo
+        body: JSON.stringify({ studentId: 'S1', amount: 15000 })
+      })
+      const initData = await initRes.json()
+      
+      if (!initRes.ok) throw new Error(initData.error || 'Erreur init')
+      
+      const reference = initData.data.reference
+      
+      // 2. Simuler l'appel Server-to-Server du Webhook par PayTech
+      const webhookRes = await fetch('/api/v1/webhooks/paytech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ref_command: reference,
+          type_event: 'sale_complete',
+          item_price: 15000,
+          token: `PT-SIMULATION-${Math.random().toString(36).substring(7)}`
+        })
+      })
+      
+      if (webhookRes.ok) {
+        alert(`Succès S2S ! Paiement PayTech validé (Réf: ${reference})`)
+        mutate('/api/paiements') // Rafraîchir les données
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Erreur lors de la simulation")
+    } finally {
+      setIsSimulating(false)
+    }
+  }
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header with Stats Summary */}
@@ -59,13 +101,22 @@ export default function RecoveryDashboard() {
           <p className="text-muted-foreground mt-1">Suivi en temps réel des flux financiers de l'établissement.</p>
         </div>
         <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            className="rounded-xl gap-2 border-primary text-primary hover:bg-primary hover:text-white transition-all h-12"
+            onClick={handleSimulatePaytech}
+            disabled={isSimulating}
+          >
+            <Zap size={18} />
+            {isSimulating ? "Simulation..." : "Simuler PayTech"}
+          </Button>
           <Button variant="outline" className="rounded-xl gap-2 border-border h-12">
             <Download size={18} />
-            Exporter (PDF/Excel)
+            Exporter
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
+          <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20 hidden md:flex">
             <CreditCard size={18} />
-            Lancer un appel de fonds
+            Lancer appel
           </Button>
         </div>
       </div>
