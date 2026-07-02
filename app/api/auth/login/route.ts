@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createSessionCookie } from '@/lib/auth';
 
+import bcrypt from 'bcryptjs';
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
@@ -10,8 +12,12 @@ export async function POST(request: NextRequest) {
       where: { email }
     });
 
-    // In a real app, you should use bcrypt to hash and compare passwords
-    if (!user || user.password !== password) {
+    if (!user) {
+      return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
     }
 
