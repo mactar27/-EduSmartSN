@@ -1,14 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Printer, Download, CheckCircle, Award, FileText, QrCode } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { QRCodeSVG } from "qrcode.react"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 export default function StudentTranscript() {
   const [student, setStudent] = useState<any>(null)
   const [tenant, setTenant] = useState<any>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const transcriptRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Mock data for the transcript
@@ -55,6 +59,37 @@ export default function StudentTranscript() {
       .then(data => setTenant(data.tenant));
   }, [])
 
+  const handleDownloadPDF = async () => {
+    if (!transcriptRef.current) return
+    setIsGenerating(true)
+    
+    try {
+      const canvas = await html2canvas(transcriptRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      })
+      
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save(`Releve_Notes_${student.matricule}.pdf`)
+    } catch (err) {
+      console.error("Error generating PDF", err)
+      alert("Erreur lors de la génération du PDF")
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   if (!student) return null
 
   return (
@@ -66,14 +101,18 @@ export default function StudentTranscript() {
             <Printer size={18} />
             Imprimer
           </Button>
-          <Button className="bg-primary rounded-xl gap-2 shadow-lg shadow-primary/20 font-bold">
+          <Button 
+            className="bg-primary rounded-xl gap-2 shadow-lg shadow-primary/20 font-bold"
+            onClick={handleDownloadPDF}
+            disabled={isGenerating}
+          >
             <Download size={18} />
-            Télécharger PDF
+            {isGenerating ? "Génération..." : "Télécharger PDF"}
           </Button>
         </div>
       </div>
 
-      <div className="bg-white text-black p-12 rounded-[2rem] shadow-2xl border border-slate-200 max-w-5xl mx-auto relative overflow-hidden font-serif print:shadow-none print:border-none print:p-0">
+      <div ref={transcriptRef} className="bg-white text-black p-12 rounded-[2rem] shadow-2xl border border-slate-200 max-w-5xl mx-auto relative overflow-hidden font-serif print:shadow-none print:border-none print:p-0">
         {/* Dynamic Watermark */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none rotate-[-30deg]">
           <h1 className="text-[150px] font-black uppercase">{tenant?.name || 'EDUSMART'}</h1>
