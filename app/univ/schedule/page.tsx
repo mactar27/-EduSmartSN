@@ -7,116 +7,210 @@ import {
   ChevronRight, 
   Clock, 
   MapPin, 
-  BookOpen, 
   User,
-  Filter,
   Download,
-  Plus
+  Plus,
+  MoreHorizontal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
-const HOURS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"]
+const START_HOUR = 8
+const END_HOUR = 18
+const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => i + START_HOUR)
 
+// Improved Mock Events with exact times in minutes
 const MOCK_EVENTS = [
-  { day: "Lundi", start: "08:00", end: "10:00", subject: "Mathématiques", room: "Salle 102", prof: "Dr. Ba", color: "bg-emerald-500" },
-  { day: "Lundi", start: "10:00", end: "12:00", subject: "Informatique", room: "Labo 1", prof: "M. Diallo", color: "bg-emerald-500" },
-  { day: "Mardi", start: "14:00", end: "16:00", subject: "Anglais", room: "Salle 205", prof: "Mme. Sarr", color: "bg-amber-500" },
-  { day: "Mercredi", start: "09:00", end: "12:00", subject: "Physique", room: "Amphi A", prof: "Dr. Ndoye", color: "bg-rose-500" },
+  { 
+    id: 1, day: "Lundi", startTime: "08:00", endTime: "10:30", 
+    subject: "Mathématiques Appliquées", room: "Amphi 102", 
+    prof: "Dr. Ba", type: "CM",
+    color: "from-indigo-500 to-blue-600", shadow: "shadow-blue-500/30"
+  },
+  { 
+    id: 2, day: "Lundi", startTime: "11:00", endTime: "13:00", 
+    subject: "Algorithmique", room: "Labo 1", 
+    prof: "M. Diallo", type: "TD",
+    color: "from-emerald-400 to-emerald-600", shadow: "shadow-emerald-500/30"
+  },
+  { 
+    id: 3, day: "Mardi", startTime: "14:30", endTime: "17:00", 
+    subject: "Anglais Technique", room: "Salle 205", 
+    prof: "Mme. Sarr", type: "TD",
+    color: "from-amber-400 to-orange-500", shadow: "shadow-orange-500/30"
+  },
+  { 
+    id: 4, day: "Mercredi", startTime: "09:00", endTime: "12:00", 
+    subject: "Physique Quantique", room: "Amphi A", 
+    prof: "Dr. Ndoye", type: "CM",
+    color: "from-rose-400 to-red-600", shadow: "shadow-rose-500/30"
+  },
+  { 
+    id: 5, day: "Jeudi", startTime: "10:00", endTime: "12:00", 
+    subject: "Base de données", room: "Labo 3", 
+    prof: "Dr. Fall", type: "TP",
+    color: "from-violet-500 to-purple-600", shadow: "shadow-purple-500/30"
+  }
 ]
 
 export default function SchedulePage() {
+  const [view, setView] = useState<"week" | "month">("week")
+
+  // Function to calculate top and height based on time strings like "08:30"
+  const getEventPosition = (start: string, end: string) => {
+    const [startH, startM] = start.split(":").map(Number)
+    const [endH, endM] = end.split(":").map(Number)
+    
+    // Top position: (Hour - START_HOUR) * 5rem + (Minutes / 60) * 5rem
+    const top = (startH - START_HOUR) * 5 + (startM / 60) * 5
+    // Height: (End Hour - Start Hour) * 5rem + ((End Minutes - Start Minutes) / 60) * 5rem
+    const height = (endH - startH) * 5 + ((endM - startM) / 60) * 5
+
+    return { top: `${top}rem`, height: `${height}rem` }
+  }
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Emploi du Temps</h2>
-          <p className="text-muted-foreground mt-1">Planning hebdomadaire des cours et examens.</p>
+          <p className="text-muted-foreground mt-1">Gestion dynamique et temps réel des plannings.</p>
         </div>
         <div className="flex gap-3">
-           <Button variant="outline" className="h-12 rounded-xl gap-2 border-border shadow-sm">
+           <Button variant="outline" className="h-12 rounded-xl gap-2 border-border shadow-sm bg-card hover:bg-muted/50">
             <Download size={18} />
-            Exporter PDF
+            <span className="hidden sm:inline">Exporter</span>
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
+          <Button className="bg-primary hover:bg-primary/90 h-12 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
             <Plus size={18} />
             Nouveau Cours
           </Button>
         </div>
       </div>
 
-      <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden shadow-xl">
-        <div className="p-6 border-b border-border bg-muted/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted">
+      <Card className="border-border bg-card rounded-[2rem] overflow-hidden shadow-2xl shadow-slate-200/50">
+        {/* Toolbar */}
+        <div className="p-6 border-b border-border bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 text-slate-600">
               <ChevronLeft size={20} />
             </Button>
-            <h3 className="text-lg font-bold">Semaine du 15 au 21 Avril 2024</h3>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted">
+            <div className="flex items-center gap-2 px-4">
+              <CalendarIcon size={18} className="text-primary" />
+              <h3 className="text-sm font-black uppercase tracking-wider text-slate-700">15 - 21 Avril 2026</h3>
+            </div>
+            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 text-slate-600">
               <ChevronRight size={20} />
             </Button>
           </div>
-          <div className="flex items-center gap-2">
-             <Button variant="outline" size="sm" className="rounded-full px-4 h-9 border-primary text-primary font-bold">Semaine</Button>
-             <Button variant="ghost" size="sm" className="rounded-full px-4 h-9">Mois</Button>
+
+          <div className="flex items-center bg-slate-200/50 p-1 rounded-xl">
+             <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`rounded-lg px-6 h-9 font-bold transition-all ${view === 'week' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                onClick={() => setView('week')}
+              >
+                Semaine
+              </Button>
+             <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`rounded-lg px-6 h-9 font-bold transition-all ${view === 'month' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                onClick={() => setView('month')}
+              >
+                Mois
+              </Button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[800px] relative">
-            {/* Header Jours */}
-            <div className="grid grid-cols-[100px_repeat(6,1fr)] border-b border-border">
-              <div className="p-4 bg-muted/5 font-bold text-xs uppercase tracking-widest text-muted-foreground text-center">Heure</div>
-              {DAYS.map(day => (
-                <div key={day} className="p-4 font-black text-sm text-center border-l border-border">{day}</div>
+        {/* Schedule Grid */}
+        <div className="overflow-x-auto bg-slate-50">
+          <div className="min-w-[900px] relative">
+            
+            {/* Current Time Indicator (Mocked at 10:45) */}
+            <div className="absolute left-20 right-0 h-px bg-rose-500 z-20 pointer-events-none" style={{ top: `${(10.75 - START_HOUR) * 5 + 4}rem` }}>
+              <div className="absolute -left-2 -top-1.5 w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
+            </div>
+
+            {/* Header Days */}
+            <div className="grid grid-cols-[80px_repeat(6,1fr)] border-b border-slate-200 bg-white sticky top-0 z-30 shadow-sm">
+              <div className="p-4 flex items-center justify-center border-r border-slate-100">
+                <Clock size={16} className="text-slate-400" />
+              </div>
+              {DAYS.map((day, idx) => (
+                <div key={day} className="p-4 flex flex-col items-center justify-center border-r border-slate-100 gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{day}</span>
+                  <span className={`text-xl font-black ${idx === 2 ? 'text-primary' : 'text-slate-800'}`}>
+                    {15 + idx}
+                  </span>
+                  {idx === 2 && <div className="w-1 h-1 rounded-full bg-primary mt-1" />}
+                </div>
               ))}
             </div>
 
-            {/* Grid Planning */}
-            <div className="grid grid-cols-[100px_repeat(6,1fr)]">
-              {/* Colonne Heures */}
-              <div className="flex flex-col">
+            {/* Grid Body */}
+            <div className="grid grid-cols-[80px_repeat(6,1fr)] bg-white relative">
+              
+              {/* Hours Column */}
+              <div className="flex flex-col border-r border-slate-100 bg-slate-50/50">
                 {HOURS.map(hour => (
-                  <div key={hour} className="h-20 p-2 text-[10px] font-bold text-muted-foreground border-b border-border flex items-start justify-center">
-                    {hour}
+                  <div key={hour} className="h-20 relative">
+                    <span className="absolute -top-2.5 right-4 text-[10px] font-black text-slate-400">
+                      {hour.toString().padStart(2, '0')}:00
+                    </span>
                   </div>
                 ))}
               </div>
 
-              {/* Colonnes Jours */}
+              {/* Days Columns */}
               {DAYS.map(day => (
-                <div key={day} className="relative border-l border-border bg-grid-pattern group">
+                <div key={day} className="relative border-r border-slate-100">
                   {HOURS.map(hour => (
-                    <div key={`${day}-${hour}`} className="h-20 border-b border-border/50 group-hover:border-border transition-colors"></div>
+                    <div key={`${day}-${hour}`} className="h-20 border-b border-slate-100/50 hover:bg-slate-50/80 transition-colors" />
                   ))}
                   
-                  {/* Events Overlay */}
-                  {MOCK_EVENTS.filter(e => e.day === day).map((event, i) => {
-                    const startIndex = HOURS.indexOf(event.start)
-                    const endIndex = HOURS.indexOf(event.end)
-                    const duration = endIndex - startIndex
+                  {/* Events for this day */}
+                  {MOCK_EVENTS.filter(e => e.day === day).map(event => {
+                    const { top, height } = getEventPosition(event.startTime, event.endTime)
                     
                     return (
                       <div 
-                        key={i}
-                        className={`absolute left-1 right-1 p-3 rounded-2xl shadow-lg border-l-4 border-white/20 text-white ${event.color} transition-transform hover:scale-[1.02] cursor-pointer`}
-                        style={{ 
-                          top: `${startIndex * 5}rem`, 
-                          height: `${duration * 5}rem`,
-                          zIndex: 10
-                        }}
+                        key={event.id}
+                        className={`absolute left-1.5 right-1.5 rounded-2xl p-3 text-white shadow-lg transition-all hover:scale-[1.02] hover:-translate-y-1 cursor-pointer bg-gradient-to-br ${event.color} ${event.shadow}`}
+                        style={{ top, height, zIndex: 10 }}
                       >
-                        <p className="text-xs font-black uppercase mb-1 leading-tight">{event.subject}</p>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold opacity-90">
-                            <Clock size={10} /> {event.start} - {event.end}
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                            {event.type}
+                          </span>
+                          <button className="text-white/70 hover:text-white transition-colors">
+                            <MoreHorizontal size={14} />
+                          </button>
+                        </div>
+                        
+                        <h4 className="text-xs font-black leading-tight mb-2 line-clamp-2 drop-shadow-md">
+                          {event.subject}
+                        </h4>
+                        
+                        <div className="space-y-1.5 mt-auto absolute bottom-3 left-3 right-3">
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/90">
+                            <Clock size={12} className="opacity-70" /> 
+                            {event.startTime} - {event.endTime}
                           </div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold opacity-90">
-                            <MapPin size={10} /> {event.room}
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/90">
+                            <MapPin size={12} className="opacity-70" /> 
+                            {event.room}
                           </div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold opacity-90">
-                            <User size={10} /> {event.prof}
+                          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
+                            <Avatar className="w-5 h-5 border border-white/30">
+                              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${event.prof}&backgroundColor=ffffff`} />
+                              <AvatarFallback className="text-[8px] text-black">PR</AvatarFallback>
+                            </Avatar>
+                            <span className="text-[10px] font-bold truncate text-white/90">{event.prof}</span>
                           </div>
                         </div>
                       </div>
