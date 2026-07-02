@@ -40,6 +40,39 @@ const getTypeColor = (type: string) => {
 export default function SchedulePage() {
   const [view, setView] = useState<"week" | "month">("week")
   const [selectedClassId, setSelectedClassId] = useState<string>("")
+  const [currentDate, setCurrentDate] = useState(new Date())
+
+  // Calculate current week dates
+  const getMonday = (d: Date) => {
+    const date = new Date(d)
+    const day = date.getDay()
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1)
+    return new Date(date.setDate(diff))
+  }
+
+  const startOfWeek = getMonday(currentDate)
+  const weekDates = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(startOfWeek)
+    d.setDate(d.getDate() + i)
+    return d
+  })
+
+  const endOfWeek = weekDates[5]
+  const monthStr = startOfWeek.toLocaleDateString('fr-FR', { month: 'long' })
+  const yearStr = startOfWeek.getFullYear()
+  const weekHeader = `${startOfWeek.getDate()} - ${endOfWeek.getDate()} ${monthStr} ${yearStr}`
+
+  const prevWeek = () => {
+    const d = new Date(currentDate)
+    d.setDate(d.getDate() - 7)
+    setCurrentDate(d)
+  }
+
+  const nextWeek = () => {
+    const d = new Date(currentDate)
+    d.setDate(d.getDate() + 7)
+    setCurrentDate(d)
+  }
 
   // Fetch classes (departments)
   const { data: deptData, isLoading: deptsLoading } = useSWR('/api/univ/departments', fetcher)
@@ -114,14 +147,14 @@ export default function SchedulePage() {
 
             {/* Date Navigation */}
             <div className="flex items-center gap-4 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 w-full sm:w-auto justify-between">
-              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-600 h-9 w-9">
+              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-600 h-9 w-9" onClick={prevWeek}>
                 <ChevronLeft size={18} />
               </Button>
               <div className="flex items-center gap-2 px-2">
                 <CalendarIcon size={16} className="text-primary hidden sm:block" />
-                <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-700 whitespace-nowrap">15 - 21 Avril 2026</h3>
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-700 whitespace-nowrap">{weekHeader}</h3>
               </div>
-              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-600 h-9 w-9">
+              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-600 h-9 w-9" onClick={nextWeek}>
                 <ChevronRight size={18} />
               </Button>
             </div>
@@ -161,15 +194,20 @@ export default function SchedulePage() {
               <div className="p-4 flex items-center justify-center border-r border-slate-100">
                 <Clock size={16} className="text-slate-400" />
               </div>
-              {DAYS.map((day, idx) => (
-                <div key={day} className="p-4 flex flex-col items-center justify-center border-r border-slate-100 gap-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{day}</span>
-                  <span className={`text-xl font-black ${idx === 2 ? 'text-primary' : 'text-slate-800'}`}>
-                    {15 + idx}
-                  </span>
-                  {idx === 2 && <div className="w-1 h-1 rounded-full bg-primary mt-1" />}
-                </div>
-              ))}
+              {weekDates.map((date, idx) => {
+                const isToday = new Date().toDateString() === date.toDateString()
+                return (
+                  <div key={idx} className="p-4 flex flex-col items-center justify-center border-r border-slate-100 gap-1">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? 'text-primary' : 'text-slate-500'}`}>
+                      {DAYS[idx]}
+                    </span>
+                    <span className={`text-xl font-black ${isToday ? 'text-primary' : 'text-slate-800'}`}>
+                      {date.getDate()}
+                    </span>
+                    {isToday && <div className="w-1 h-1 rounded-full bg-primary mt-1" />}
+                  </div>
+                )
+              })}
             </div>
 
             {/* Grid Body */}
