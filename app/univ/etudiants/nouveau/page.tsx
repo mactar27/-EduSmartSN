@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import useSWR from "swr"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,7 @@ export default function NewStudentPage() {
   })
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   const { data: deptsData } = useSWR('/api/univ/departments', fetcher)
   const departments = deptsData?.data || []
@@ -70,20 +71,24 @@ export default function NewStudentPage() {
               type="file" 
               className="hidden" 
               accept="image/*"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Pour l'aperçu immédiat
-                  const url = URL.createObjectURL(file);
-                  setPhotoPreview(url);
-                  
-                  // Conversion en Base64 pour stocker directement dans la base de données
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    const base64String = reader.result as string;
-                    setFormData({...formData, photoUrl: base64String}); 
-                  };
-                  reader.readAsDataURL(file);
+                  // Show immediate preview
+                  setPhotoPreview(URL.createObjectURL(file));
+                  setIsUploadingPhoto(true);
+                  try {
+                    const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                      method: 'POST',
+                      body: file,
+                    });
+                    const blob = await res.json();
+                    if (blob.url) setFormData({ ...formData, photoUrl: blob.url });
+                  } catch (err) {
+                    console.error('Photo upload failed:', err);
+                  } finally {
+                    setIsUploadingPhoto(false);
+                  }
                 }
               }}
             />

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Resend } from 'resend';
+import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,13 +86,14 @@ export async function POST(request: NextRequest) {
     const generatedStudentId = `${schoolInitials}-${year}-${randomSuffix}`;
 
     const finalEmail = email || `${generatedStudentId.toLowerCase()}@wockytech.xyz`;
-    const tempPassword = 'password123';
+    const tempPassword = 'EduSmart2025!';
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
     const user = await prisma.user.create({
       data: {
         name,
         email: finalEmail,
-        password: tempPassword, // En production, il faut hasher ce mot de passe
+        password: hashedPassword,
         role: 'STUDENT',
         tenantId: tenant.id,
         studentProfile: {

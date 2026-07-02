@@ -4,11 +4,23 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// Helper to get the active tenant
+async function getActiveTenantId(request: NextRequest): Promise<string | null> {
+  const headerTenantId = request.headers.get('x-tenant-id');
+  if (headerTenantId && headerTenantId !== 'DEMO-TENANT-001') return headerTenantId;
+  
+  const tenant = await prisma.tenant.findFirst({
+    where: { status: 'ACTIVE' },
+    orderBy: { createdAt: 'asc' }
+  });
+  return tenant?.id || null;
+}
+
 // GET all fees for the current tenant
 export async function GET(request: NextRequest) {
   try {
-    const tenantId = request.headers.get('x-tenant-id');
-    if (!tenantId) return NextResponse.json({ error: 'Tenant non identifié' }, { status: 400 });
+    const tenantId = await getActiveTenantId(request);
+    if (!tenantId) return NextResponse.json({ error: 'Aucun tenant actif trouvé' }, { status: 400 });
 
     const fees = await prisma.fee.findMany({
       where: { tenantId },
@@ -24,8 +36,8 @@ export async function GET(request: NextRequest) {
 // POST a new fee
 export async function POST(request: NextRequest) {
   try {
-    const tenantId = request.headers.get('x-tenant-id');
-    if (!tenantId) return NextResponse.json({ error: 'Tenant non identifié' }, { status: 400 });
+    const tenantId = await getActiveTenantId(request);
+    if (!tenantId) return NextResponse.json({ error: 'Aucun tenant actif trouvé' }, { status: 400 });
 
     const { name, amount, category, recurrence } = await request.json();
 
@@ -51,12 +63,12 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const tenantId = request.headers.get('x-tenant-id');
+    const tenantId = await getActiveTenantId(request);
 
     if (!id || !tenantId) return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
 
     await prisma.fee.delete({
-      where: { id, tenantId } // Using tenantId for safety, though id is unique
+      where: { id }
     });
 
     return NextResponse.json({ success: true });

@@ -167,7 +167,7 @@ export default function SchedulePage() {
             <Download size={18} />
             <span className="hidden sm:inline">Exporter</span>
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 h-12 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
+          <Button className="bg-primary hover:bg-primary/90 h-12 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => setIsModalOpen(true)}>
             <Plus size={18} />
             Nouveau Cours
           </Button>
