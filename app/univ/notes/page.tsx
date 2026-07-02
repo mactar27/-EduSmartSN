@@ -97,6 +97,35 @@ export default function GradeEntry() {
     }
   }
 
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !selectedSubject) {
+      alert("Veuillez d'abord sélectionner une matière.")
+      return
+    }
+    setIsImporting(true)
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      try {
+        const csv = event.target?.result as string
+        const lines = csv.split('\n').slice(1)
+        const grades: Record<string, string> = {}
+        lines.forEach(line => {
+          const [matricule, note] = line.split(',')
+          const student = students.find((s: any) => s.studentId === matricule?.trim())
+          if (student && note?.trim()) grades[student.id] = note.trim()
+        })
+        setLocalGrades(prev => ({ ...prev, ...grades }))
+        alert(`${Object.keys(grades).length} note(s) importée(s). Format attendu: matricule,note`)
+      } catch (err) {
+        alert('Format invalide. Utilisez un CSV avec colonnes: matricule,note')
+      } finally {
+        setIsImporting(false)
+      }
+    }
+    reader.readAsText(file)
+  }
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
