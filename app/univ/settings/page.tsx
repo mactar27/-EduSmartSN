@@ -10,6 +10,7 @@ export default function UnivSettings() {
   const [tenant, setTenant] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   useEffect(() => {
     fetchTenant()
@@ -27,6 +28,30 @@ export default function UnivSettings() {
       setIsLoading(false)
     }
   }
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setIsUploading(true);
+    
+    try {
+      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST',
+        body: file,
+      });
+      
+      const newBlob = (await response.json()) as any;
+      
+      if (newBlob.url) {
+        setTenant({ ...tenant, logoUrl: newBlob.url });
+      }
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Erreur lors du téléversement');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,13 +103,26 @@ export default function UnivSettings() {
                       <Image src="/logo.png" alt="Default" width={100} height={40} className="opacity-20" />
                     )}
                   </div>
-                  <div className="flex-1 space-y-2">
-                    <Input 
-                      placeholder="URL de votre logo (PNG transparent)" 
-                      value={tenant.logoUrl || ""}
-                      onChange={(e) => setTenant({...tenant, logoUrl: e.target.value})}
-                      className="bg-muted/30 h-12 rounded-xl"
-                    />
+                  <div className="flex-1 space-y-4">
+                    {isUploading ? (
+                      <div className="flex items-center gap-3 h-12 bg-muted/30 px-4 rounded-xl border border-dashed border-primary">
+                        <Upload size={18} className="animate-bounce text-primary" />
+                        <span className="text-sm font-bold text-primary">Téléversement en cours...</span>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleUpload}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex items-center gap-3 h-12 bg-muted/30 hover:bg-muted/50 px-4 rounded-xl border border-dashed border-border transition-colors">
+                          <Upload size={18} className="text-muted-foreground" />
+                          <span className="text-sm font-medium text-muted-foreground">Cliquez pour importer une image</span>
+                        </div>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground italic">Recommandé : Format paysage, fond transparent, min 400px.</p>
                   </div>
                 </div>
