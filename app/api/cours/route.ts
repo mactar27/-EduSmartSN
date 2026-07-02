@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,43 +10,65 @@ export async function GET(request: NextRequest) {
     const filiere = searchParams.get('filiere');
     const niveau = searchParams.get('niveau');
 
-    let sql = `
-      SELECT c.*, et.name as etablissement_name,
-             CONCAT(u.first_name, ' ', u.last_name) as professor_name
-      FROM cours c
-      JOIN etablissements et ON c.etablissement_id = et.id
-      LEFT JOIN users u ON c.professor_id = u.id
-      WHERE c.is_active = TRUE
-    `;
-    const params: (string | number)[] = [];
-
+    const whereClause: any = {};
     if (etablissement_id) {
-      sql += ' AND c.etablissement_id = ?';
-      params.push(parseInt(etablissement_id));
+      // In Prisma schema, Subject doesn't directly link to Tenant. 
+      // It links to UnitOfTeaching -> Department -> Faculty -> Tenant
+      whereClause.ue = {
+        department: {
+          faculty: {
+            tenantId: etablissement_id
+          }
+        }
+      };
     }
-
+    
     if (filiere) {
-      sql += ' AND c.filiere = ?';
-      params.push(filiere);
+      if (whereClause.ue) {
+        whereClause.ue.department = { ...whereClause.ue.department, name: filiere };
+      } else {
+        whereClause.ue = { department: { name: filiere } };
+      }
     }
 
-    if (niveau) {
-      sql += ' AND c.niveau = ?';
-      params.push(niveau);
-    }
+    const [subjects, total] = await Promise.all([
+      prisma.subject.findMany({
+        where: whereClause,
+        include: {
+          ue: {
+            include: {
+              department: {
+                include: {
+                  faculty: {
+                    include: { tenant: true }
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderBy: { code: 'asc' },
+        skip: offset,
+        take: limit
+      }),
+      prisma.subject.count({ where: whereClause })
+    ]);
 
-    sql += ' ORDER BY c.code ASC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
-
-    const cours = await query(sql, params);
-
-    const [countResult] = await query<{ total: number }[]>(
-      'SELECT COUNT(*) as total FROM cours WHERE is_active = TRUE'
-    );
+    const formattedSubjects = subjects.map(s => ({
+      id: s.id,
+      code: s.code,
+      name: s.name,
+      credits: s.credits,
+      coefficient: s.coefficient,
+      etablissement_name: s.ue?.department?.faculty?.tenant?.name || '',
+      professor_name: '', // Subject doesn't have professor directly in new schema without ProfessorSubject relation
+      filiere: s.ue?.department?.name || '',
+      niveau: '' // Not in schema
+    }));
 
     return NextResponse.json({
-      data: cours,
-      total: countResult?.total || 0,
+      data: formattedSubjects,
+      total,
       limit,
       offset,
     });
@@ -58,3 +80,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

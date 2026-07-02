@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
+import { PaymentStatus } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,55 +11,55 @@ export async function GET(request: NextRequest) {
     const statut = searchParams.get('statut');
     const methode = searchParams.get('methode');
 
-    let sql = `
-      SELECT p.*, 
-             CONCAT(u.first_name, ' ', u.last_name) as etudiant_name,
-             e.matricule,
-             et.name as etablissement_name
-      FROM paiements p
-      JOIN etudiants e ON p.etudiant_id = e.id
-      JOIN users u ON e.user_id = u.id
-      JOIN etablissements et ON p.etablissement_id = et.id
-      WHERE 1=1
-    `;
-    const params: (string | number)[] = [];
+    const whereClause: any = {};
+    if (etablissement_id) whereClause.tenantId = etablissement_id;
+    if (statut) whereClause.status = statut === 'complete' ? 'PAID' : (statut.toUpperCase() as PaymentStatus);
+    if (methode) whereClause.method = methode;
 
-    if (etablissement_id) {
-      sql += ' AND p.etablissement_id = ?';
-      params.push(parseInt(etablissement_id));
-    }
+    const [payments, total] = await Promise.all([
+      prisma.payment.findMany({
+        where: whereClause,
+        include: {
+          student: {
+            include: { user: true }
+          },
+          tenant: true
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: offset,
+        take: limit
+      }),
+      prisma.payment.count({ where: whereClause })
+    ]);
 
-    if (statut) {
-      sql += ' AND p.statut = ?';
-      params.push(statut);
-    }
+    // Group by method totals (simple approximation since Prisma groupBy is limited)
+    const totalsByMethodRaw = await prisma.payment.groupBy({
+      by: ['method'],
+      where: { status: 'PAID' },
+      _sum: { amount: true },
+      _count: true
+    });
 
-    if (methode) {
-      sql += ' AND p.methode = ?';
-      params.push(methode);
-    }
+    const totals_by_method = totalsByMethodRaw.map(t => ({
+      methode: t.method,
+      total: t._sum.amount || 0,
+      count: t._count
+    }));
 
-    sql += ' ORDER BY p.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
-
-    const paiements = await query(sql, params);
-
-    // Get totals by method
-    const totals = await query<{ methode: string; total: number; count: number }[]>(`
-      SELECT methode, SUM(montant) as total, COUNT(*) as count
-      FROM paiements
-      WHERE statut = 'complete'
-      GROUP BY methode
-    `);
-
-    const [countResult] = await query<{ total: number }[]>(
-      'SELECT COUNT(*) as total FROM paiements'
-    );
+    const formattedPayments = payments.map(p => ({
+      ...p,
+      etudiant_name: p.student?.name || p.student?.user?.name || 'Inconnu',
+      matricule: p.student?.studentId || '',
+      etablissement_name: p.tenant?.name || '',
+      statut: p.status === 'PAID' ? 'complete' : p.status.toLowerCase(), // mapping back for frontend
+      methode: p.method,
+      montant: p.amount
+    }));
 
     return NextResponse.json({
-      data: paiements,
-      totals_by_method: totals,
-      total: countResult?.total || 0,
+      data: formattedPayments,
+      totals_by_method,
+      total,
       limit,
       offset,
     });
@@ -76,23 +77,27 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { etudiant_id, etablissement_id, montant, type, methode, description } = body;
 
-    if (!etudiant_id || !etablissement_id || !montant || !type || !methode) {
+    if (!etudiant_id || !etablissement_id || !montant || !methode) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
       );
     }
 
-    // Generate unique reference
-    const reference = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const transactionId = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
-    await query(
-      `INSERT INTO paiements (reference, etudiant_id, etablissement_id, montant, type, methode, description)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [reference, etudiant_id, etablissement_id, montant, type, methode, description || null]
-    );
+    await prisma.payment.create({
+      data: {
+        studentId: etudiant_id,
+        tenantId: etablissement_id,
+        amount: parseFloat(montant),
+        method: methode,
+        status: 'PENDING',
+        transactionId
+      }
+    });
 
-    return NextResponse.json({ reference, message: 'Paiement created' }, { status: 201 });
+    return NextResponse.json({ reference: transactionId, message: 'Paiement created' }, { status: 201 });
   } catch (error) {
     console.error('Error creating paiement:', error);
     return NextResponse.json(
@@ -101,3 +106,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

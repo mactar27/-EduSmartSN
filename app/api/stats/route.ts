@@ -1,18 +1,34 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const etablissementsResult = await query<any[]>('SELECT COUNT(*) as count FROM etablissements WHERE is_active = 1');
-    const etudiantsResult = await query<any[]>('SELECT COUNT(*) as count FROM etudiants');
-    const professeursResult = await query<any[]>('SELECT COUNT(*) as count FROM users WHERE role = "professor"');
-    const paymentsResult = await query<any[]>('SELECT SUM(montant) as sum FROM paiements WHERE statut = "reussi" AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)');
+    const etablissementsCount = await prisma.tenant.count({
+      where: { status: 'ACTIVE' }
+    });
+
+    const etudiantsCount = await prisma.student.count();
+
+    const professeursCount = await prisma.professor.count();
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const paymentsAggregation = await prisma.payment.aggregate({
+      where: {
+        status: 'PAID',
+        createdAt: { gte: thirtyDaysAgo }
+      },
+      _sum: {
+        amount: true
+      }
+    });
 
     return NextResponse.json({
-      total_etablissements: etablissementsResult[0]?.count || 0,
-      total_etudiants: etudiantsResult[0]?.count || 0,
-      total_professeurs: professeursResult[0]?.count || 0,
-      paiements_mois: paymentsResult[0]?.sum || 0,
+      total_etablissements: etablissementsCount || 0,
+      total_etudiants: etudiantsCount || 0,
+      total_professeurs: professeursCount || 0,
+      paiements_mois: paymentsAggregation._sum.amount || 0,
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
@@ -22,3 +38,4 @@ export async function GET() {
     );
   }
 }
+

@@ -1,15 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const users = await query<any[]>(`
-      SELECT u.*, t.name as tenant_name 
-      FROM User u 
-      LEFT JOIN Tenant t ON u.tenantId = t.id 
-      ORDER BY u.createdAt DESC
-    `);
-    return NextResponse.json({ data: users });
+    const users = await prisma.user.findMany({
+      include: {
+        tenant: {
+          select: { name: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedUsers = users.map(user => ({
+      ...user,
+      tenant_name: user.tenant?.name || null
+    }));
+
+    return NextResponse.json({ data: formattedUsers });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });

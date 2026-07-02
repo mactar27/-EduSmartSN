@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,22 +7,33 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const etablissements = await query<any[]>(
-      `SELECT id, name, slug, logo_url, city, student_count FROM etablissements WHERE is_active = 1 ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
-    );
-
-    const countResult = await query<any[]>('SELECT COUNT(*) as total FROM etablissements WHERE is_active = 1');
+    const [tenants, total] = await Promise.all([
+      prisma.tenant.findMany({
+        where: { status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+        skip: offset,
+        take: limit,
+        include: {
+          _count: {
+            select: { students: true }
+          }
+        }
+      }),
+      prisma.tenant.count({
+        where: { status: 'ACTIVE' }
+      })
+    ]);
 
     return NextResponse.json({
-      data: etablissements.map(e => ({
+      data: tenants.map(e => ({
         id: e.id,
         name: e.name,
-        slug: e.slug,
-        city: e.city || 'Sénégal',
-        student_count: e.student_count || 0,
-        logo_url: e.logo_url
+        slug: e.subdomain,
+        city: 'Sénégal', // Defaulting as city is not in schema
+        student_count: e._count.students || 0,
+        logo_url: e.logoUrl
       })),
-      total: countResult[0]?.total || 0,
+      total,
       limit,
       offset,
     });

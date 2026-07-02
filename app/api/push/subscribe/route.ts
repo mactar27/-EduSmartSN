@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,14 +7,24 @@ export async function POST(request: NextRequest) {
     const { endpoint, keys } = subscription;
     const { p256dh, auth } = keys;
 
-    // For demo, we associate with a generic user or get from session
-    // In real app, use auth() to get userId
-    const userId = "demo-user-id"; 
+    // We'll link to an admin user since there's no auth session here in demo.
+    // In real app, you fetch userId from session.
+    const adminUser = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } });
+    if (!adminUser) return NextResponse.json({ error: 'No user to subscribe to' }, { status: 400 });
 
-    await query(
-      'INSERT INTO PushSubscription (id, userId, endpoint, p256dh, auth, createdAt) VALUES (UUID(), ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE endpoint = VALUES(endpoint)',
-      [userId, endpoint, p256dh, auth]
-    );
+    await prisma.pushSubscription.upsert({
+      where: { endpoint },
+      update: {
+        p256dh,
+        auth
+      },
+      create: {
+        userId: adminUser.id,
+        endpoint,
+        p256dh,
+        auth
+      }
+    });
 
     return NextResponse.json({ message: 'Subscription saved' });
   } catch (error) {
@@ -22,3 +32,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save subscription' }, { status: 500 });
   }
 }
+

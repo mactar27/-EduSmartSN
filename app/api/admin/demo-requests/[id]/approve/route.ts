@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
 import { Resend } from 'resend';
-import { prisma } from '@/lib/prisma'; // We'll use prisma for complex stuff if it works, or raw query
+import { prisma } from '@/lib/prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -12,45 +11,50 @@ export async function POST(
   try {
     const { id } = await params;
 
-
     // 1. Fetch demo request
-    const requests = await query<any[]>('SELECT * FROM demandes_demo WHERE id = ?', [id]);
-    if (requests.length === 0) {
+    const demo = await prisma.demoRequest.findUnique({ where: { id } });
+    if (!demo) {
       return NextResponse.json({ error: 'Demande non trouvée' }, { status: 404 });
     }
-    const demo = requests[0];
 
-    // 2. Create Etablissement (University)
-    const subdomain = demo.etablissement_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    // 2. Create Etablissement (Tenant)
+    const subdomain = demo.etablissementName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     
-    await query(
-      `INSERT INTO etablissements (name, slug, city, is_active, primary_color, secondary_color, created_at, updated_at) 
-       VALUES (?, ?, ?, 1, "#4f46e5", "#6366f1", NOW(), NOW())`,
-      [demo.etablissement_name, subdomain, 'Dakar']
-    );
+    const newTenant = await prisma.tenant.create({
+      data: {
+        name: demo.etablissementName,
+        subdomain,
+        primaryColor: "#4f46e5",
+        secondaryColor: "#6366f1",
+        status: "ACTIVE"
+      }
+    });
 
-    // Get the generated ID
-    const [newEtab]: any = await query('SELECT id FROM etablissements WHERE slug = ? LIMIT 1', [subdomain]);
-    const etablissementId = newEtab.id;
+    const etablissementId = newTenant.id;
 
     // 3. Create or Link Admin User
-    const existingUsers = await query<any[]>('SELECT id FROM users WHERE email = ?', [demo.email]);
-    let userId;
     let tempPassword = "Mot de passe existant";
+    const existingUser = await prisma.user.findUnique({ where: { email: demo.email } });
 
-    if (existingUsers.length > 0) {
-      userId = existingUsers[0].id;
-      await query(
-        'UPDATE users SET etablissement_id = ?, role = "admin_university", updated_at = NOW() WHERE id = ?',
-        [etablissementId, userId]
-      );
+    if (existingUser) {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          tenantId: etablissementId,
+          role: 'ADMIN' // Adjusting to the Prisma UserRole enum
+        }
+      });
     } else {
       tempPassword = Math.random().toString(36).slice(-8);
-      await query(
-        `INSERT INTO users (email, password_hash, first_name, last_name, role, etablissement_id, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, 'admin_university', ?, NOW(), NOW())`,
-        [demo.email, tempPassword, demo.contact_name, '', etablissementId]
-      );
+      await prisma.user.create({
+        data: {
+          email: demo.email,
+          password: tempPassword,
+          name: demo.contactName,
+          role: 'ADMIN',
+          tenantId: etablissementId
+        }
+      });
     }
 
     // 4. Send Welcome Email
@@ -58,16 +62,16 @@ export async function POST(
       const { data, error: mailError } = await resend.emails.send({
         from: 'EduSmart SN <bienvenue@wockytech.xyz>',
         to: demo.email,
-        subject: `Bienvenue sur EduSmart SN - Activation de votre espace ${demo.etablissement_name}`,
+        subject: `Bienvenue sur EduSmart SN - Activation de votre espace ${demo.etablissementName}`,
         html: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
             <div style="background-color: #4f46e5; padding: 40px; text-align: center;">
               <img src="https://edusmartsn.vercel.app/logo.png" alt="EduSmart SN" style="height: 60px; width: auto;">
             </div>
             <div style="padding: 40px; background-color: #ffffff;">
-              <h2 style="color: #0f172a; margin-top: 0;">Félicitations, ${demo.contact_name} !</h2>
+              <h2 style="color: #0f172a; margin-top: 0;">Félicitations, ${demo.contactName} !</h2>
               <p style="color: #475569; line-height: 1.6; font-size: 16px;">
-                Votre demande pour l'établissement <strong>${demo.etablissement_name}</strong> a été approuvée. 
+                Votre demande pour l'établissement <strong>${demo.etablissementName}</strong> a été approuvée. 
                 Votre plateforme de gestion scolaire est désormais prête.
               </p>
               
@@ -100,8 +104,8 @@ export async function POST(
       console.error("Critical Mail Error:", err);
     }
 
-    // 5. Mark as processed (Update status instead of delete)
-    await query('UPDATE demandes_demo SET statut = "convertie", updated_at = NOW() WHERE id = ?', [id]);
+    // 5. Mark as processed (Delete since we don't have a status field)
+    await prisma.demoRequest.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Demande acceptée avec succès', etablissementId });
   } catch (error: any) {
@@ -109,3 +113,4 @@ export async function POST(
     return NextResponse.json({ error: 'Erreur lors de l\'approbation : ' + error.message }, { status: 500 });
   }
 }
+

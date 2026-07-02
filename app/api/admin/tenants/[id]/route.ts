@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function PUT(
   request: NextRequest,
@@ -11,10 +11,15 @@ export async function PUT(
     const body = await request.json();
     const { name, subdomain, primaryColor, status } = body;
 
-    await query(
-      'UPDATE Tenant SET name = ?, subdomain = ?, primaryColor = ?, status = ?, updatedAt = NOW() WHERE id = ?',
-      [name, subdomain, primaryColor, status, id]
-    );
+    await prisma.tenant.update({
+      where: { id },
+      data: {
+        name,
+        subdomain,
+        primaryColor,
+        status,
+      }
+    });
 
     return NextResponse.json({ message: 'Tenant updated successfully' });
   } catch (error) {
@@ -30,7 +35,11 @@ export async function DELETE(
   try {
     const params = await context.params;
     const { id } = params;
-    await query('DELETE FROM Tenant WHERE id = ?', [id]);
+    
+    await prisma.tenant.delete({
+      where: { id }
+    });
+    
     return NextResponse.json({ message: 'Tenant deleted successfully' });
   } catch (error) {
     console.error('Error deleting tenant:', error);

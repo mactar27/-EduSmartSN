@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { sendDemoNotification } from '@/lib/mail';
 
 export async function GET(request: NextRequest) {
@@ -8,15 +8,26 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const demandes = await query<any[]>(
-      `SELECT * FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
-    );
-    
-    const countResult = await query<any[]>("SELECT COUNT(*) as total FROM demandes_demo WHERE statut != 'convertie' OR statut IS NULL");
+    // In Prisma schema, there is no status field on DemoRequest, so we just fetch all
+    const [demandes, total] = await Promise.all([
+      prisma.demoRequest.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: offset,
+        take: limit
+      }),
+      prisma.demoRequest.count()
+    ]);
+
+    const formattedDemandes = demandes.map(d => ({
+      ...d,
+      etablissement_name: d.etablissementName,
+      contact_name: d.contactName,
+      created_at: d.createdAt
+    }));
 
     return NextResponse.json({
-      data: demandes,
-      total: countResult[0]?.total || 0,
+      data: formattedDemandes,
+      total,
       limit,
       offset,
     });
@@ -28,7 +39,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,25 +52,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier si une demande existe déjà pour cet email dans les 30 derniers jours
-    const existingRequest = await query<any[]>(
-      'SELECT id FROM demandes_demo WHERE email = ? AND created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)',
-      [email]
-    );
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const existingRequest = await prisma.demoRequest.findFirst({
+      where: {
+        email,
+        createdAt: { gt: thirtyDaysAgo }
+      }
+    });
     
-    if (existingRequest.length > 0) {
+    if (existingRequest) {
       return NextResponse.json(
         { error: 'Une demande a déjà été faite pour cet établissement ces 30 derniers jours. Veuillez patienter ou nous contacter directement.' },
         { status: 429 }
       );
     }
     
-    await query(
-      'INSERT INTO demandes_demo (etablissement_name, contact_name, email, phone, message, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
-      [etablissement_name, contact_name, email, phone, message]
-    );
+    await prisma.demoRequest.create({
+      data: {
+        etablissementName: etablissement_name,
+        contactName: contact_name,
+        email,
+        phone,
+        message
+      }
+    });
 
-    // Envoyer la notification par email (si configuré)
     try {
       await sendDemoNotification({ etablissement_name, contact_name, email, phone, message });
     } catch (e) {
@@ -79,3 +97,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, logoUrl, primaryColor, secondaryColor } = body;
 
-    await query(
-      'UPDATE Tenant SET logoUrl = ?, primaryColor = ?, secondaryColor = ?, updatedAt = NOW() WHERE id = ?',
-      [logoUrl, primaryColor, secondaryColor, id]
-    );
+    await prisma.tenant.update({
+      where: { id },
+      data: {
+        logoUrl,
+        primaryColor,
+        secondaryColor
+      }
+    });
 
     return NextResponse.json({ message: 'Configuration mise à jour' });
   } catch (error) {
@@ -17,3 +21,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
   }
 }
+

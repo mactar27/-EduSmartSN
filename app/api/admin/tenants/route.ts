@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const tenants = await query<any[]>('SELECT * FROM Tenant ORDER BY createdAt DESC');
+    const tenants = await prisma.tenant.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
     return NextResponse.json({ data: tenants });
   } catch (error) {
     console.error('Error fetching tenants:', error);
@@ -20,10 +22,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    await query(
-      'INSERT INTO Tenant (id, name, subdomain, primaryColor, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, "ACTIVE", NOW(), NOW())',
-      [id, name, subdomain, primaryColor || '#1e40af']
-    );
+    await prisma.tenant.create({
+      data: {
+        id,
+        name,
+        subdomain,
+        primaryColor: primaryColor || '#1e40af',
+        status: 'ACTIVE'
+      }
+    });
 
     return NextResponse.json({ message: 'Tenant created successfully' }, { status: 201 });
   } catch (error) {
