@@ -174,25 +174,74 @@ export default function UnivSettings() {
           </form>
 
           {/* Domain Section */}
-          <div className="bg-card border border-border rounded-3xl p-8 space-y-6 shadow-sm opacity-60">
-            <div className="flex items-center gap-3 text-muted-foreground border-b border-border pb-6">
-              <Globe size={24} />
+          <div className="bg-card border border-border rounded-3xl p-8 space-y-6 shadow-sm">
+            <div className="flex items-center gap-3 text-foreground border-b border-border pb-6">
+              <Globe size={24} className="text-primary" />
               <h3 className="text-xl font-bold">Domaine & Accès</h3>
             </div>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-muted/20 rounded-xl">
-                <div>
-                  <p className="font-bold">Sous-domaine EduSmart</p>
-                  <p className="text-sm text-primary font-mono">{tenant.subdomain}.edusmart.sn</p>
+            <div className="space-y-6">
+
+              {/* Subdomain */}
+              <div className="space-y-3">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Sous-domaine EduSmart</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={tenant.subdomain || ""}
+                    onChange={(e) => setTenant({...tenant, subdomain: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                    placeholder="ex: uvs"
+                    className="bg-muted/30 h-12 rounded-xl font-mono max-w-[180px]"
+                  />
+                  <span className="text-muted-foreground font-bold text-sm">.edusmart.sn</span>
                 </div>
-                <Button variant="ghost" className="text-xs font-bold uppercase tracking-wider">Gérer</Button>
+                <p className="text-xs text-muted-foreground">Votre URL courte : <span className="font-mono text-primary">{tenant.subdomain || 'uvs'}.edusmart.sn</span></p>
               </div>
-              <div className="flex justify-between items-center p-4 bg-muted/20 rounded-xl border border-dashed border-border">
-                <div>
-                  <p className="font-bold text-muted-foreground">Domaine Personnalisé (Premium)</p>
-                  <p className="text-xs">Ex: portail.uam.sn</p>
+
+              {/* Custom Domain */}
+              <div className="space-y-3 pt-4 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Domaine Personnalisé</label>
+                  <span className="text-[10px] font-black bg-primary/10 text-primary px-2 py-1 rounded-full">PREMIUM</span>
                 </div>
-                <span className="text-[10px] font-black bg-amber-100 text-amber-700 px-2 py-1 rounded">BIENTÔT</span>
+                <Input
+                  value={tenant.domain || ""}
+                  onChange={(e) => setTenant({...tenant, domain: e.target.value.toLowerCase()})}
+                  placeholder="Ex: portail.uvs.sn"
+                  className="bg-muted/30 h-12 rounded-xl font-mono"
+                />
+                {tenant.domain && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+                    <p className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-2">
+                      <span>⚙️</span> Instructions DNS à configurer chez votre registrar
+                    </p>
+                    <div className="font-mono text-xs space-y-2">
+                      <div className="flex gap-4 bg-white/60 p-2 rounded-lg">
+                        <span className="text-amber-700 font-bold w-12">Type</span>
+                        <span className="text-amber-700 font-bold flex-1">Nom</span>
+                        <span className="text-amber-700 font-bold flex-1">Valeur</span>
+                      </div>
+                      <div className="flex gap-4 bg-white/60 p-2 rounded-lg">
+                        <span className="w-12 text-slate-700">CNAME</span>
+                        <span className="flex-1 text-slate-700">{tenant.domain}</span>
+                        <span className="flex-1 text-primary">cname.vercel-dns.com</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-amber-700">
+                      Après avoir sauvegardé et configuré votre DNS, le domaine sera actif sous 24-48h.
+                    </p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">Pointez votre domaine vers EduSmart avec un enregistrement CNAME.</p>
+              </div>
+              
+              <div className="pt-4 flex justify-end">
+                <Button 
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="bg-primary hover:bg-primary/90 h-11 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 gap-2"
+                >
+                  <Save size={16} />
+                  {isSaving ? "Enregistrement..." : "Sauvegarder les Domaines"}
+                </Button>
               </div>
             </div>
           </div>
