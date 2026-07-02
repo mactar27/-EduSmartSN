@@ -11,15 +11,19 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function LMDManagement() {
   const [selectedDept, setSelectedDept] = useState("all")
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newClassName, setNewClassName] = useState("")
-  const [isCreating, setIsCreating] = useState(false)
+  const [isUeModalOpen, setIsUeModalOpen] = useState(false)
+  const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false)
+  const [targetUeId, setTargetUeId] = useState<string>("")
+  const [isCreatingUe, setIsCreatingUe] = useState(false)
+  const [isCreatingSubject, setIsCreatingSubject] = useState(false)
+  const [ueFormData, setUeFormData] = useState({ name: "", code: "", departmentId: "" })
+  const [subjectFormData, setSubjectFormData] = useState({ name: "", code: "", credits: "", coefficient: "1.0", ueId: "" })
 
   const { data: deptsData, mutate: mutateDepts } = useSWR('/api/univ/departments', fetcher)
   const departments = deptsData?.data || []
 
-  const { data: coursData, isLoading } = useSWR(`/api/cours?filiere=${selectedDept !== 'all' ? encodeURIComponent(selectedDept) : ''}`, fetcher)
-  const subjects = coursData?.data || []
+  const { data: coursData, isLoading, mutate: mutateCours } = useSWR(`/api/cours?filiere=${selectedDept !== 'all' ? encodeURIComponent(selectedDept) : ''}`, fetcher)
+  const ues = coursData?.data || []
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,28 +54,60 @@ export default function LMDManagement() {
     }
   }
 
-  // Group subjects by UE
-  const uesMap = new Map()
-  subjects.forEach((sub: any) => {
-    const ueKey = sub.filiere || 'Général'
-    if (!uesMap.has(ueKey)) {
-      uesMap.set(ueKey, {
-        id: ueKey,
-        name: `UE : ${ueKey}`,
-        code: `UE-${ueKey.substring(0,3).toUpperCase()}`,
-        credits: 0,
-        subjects: []
+  const handleCreateUe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsCreatingUe(true)
+    try {
+      const res = await fetch('/api/univ/ue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ueFormData)
       })
-    }
-    const ue = uesMap.get(ueKey)
-    ue.subjects.push(sub)
-    ue.credits += sub.credits
-  })
 
-  const ues = Array.from(uesMap.values())
+      if (res.ok) {
+        alert("UE créée avec succès !")
+        setUeFormData({ name: "", code: "", departmentId: "" })
+        setIsUeModalOpen(false)
+        mutateCours()
+      } else {
+        const errorData = await res.json()
+        alert(`Erreur: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsCreatingUe(false)
+    }
+  }
+
+  const handleCreateSubject = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsCreatingSubject(true)
+    try {
+      const res = await fetch('/api/univ/subjects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...subjectFormData, ueId: targetUeId })
+      })
+
+      if (res.ok) {
+        alert("Matière créée avec succès !")
+        setSubjectFormData({ name: "", code: "", credits: "", coefficient: "1.0", ueId: "" })
+        setIsSubjectModalOpen(false)
+        mutateCours()
+      } else {
+        const errorData = await res.json()
+        alert(`Erreur: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsCreatingSubject(false)
+    }
+  }
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Gestion Pédagogique (LMD)</h2>
@@ -99,7 +135,10 @@ export default function LMDManagement() {
                 ))}
              </select>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20">
+          <Button 
+            onClick={() => setIsUeModalOpen(true)}
+            className="bg-primary hover:bg-primary/90 h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/20"
+          >
             <Plus size={20} />
             Nouvelle UE
           </Button>
@@ -122,7 +161,7 @@ export default function LMDManagement() {
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">{ue.name}</h3>
-                      <p className="text-xs text-muted-foreground font-mono">{ue.code}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{ue.code} • {ue.filiere}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -132,7 +171,7 @@ export default function LMDManagement() {
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
-                    {ue.subjects.map((subject: any) => (
+                    {ue.subjects?.map((subject: any) => (
                       <div key={subject.id} className="flex items-center justify-between p-4 bg-card border border-border rounded-2xl hover:border-primary/30 transition-all group">
                         <div className="flex items-center gap-3">
                           <div className="w-2 h-8 bg-muted rounded-full group-hover:bg-primary transition-colors" />
@@ -153,7 +192,11 @@ export default function LMDManagement() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="ghost" className="w-full mt-4 border border-dashed border-border rounded-2xl py-6 text-muted-foreground hover:text-primary hover:bg-primary/5 gap-2">
+                  <Button 
+                    onClick={() => { setTargetUeId(ue.id); setIsSubjectModalOpen(true); }}
+                    variant="ghost" 
+                    className="w-full mt-4 border border-dashed border-border rounded-2xl py-6 text-muted-foreground hover:text-primary hover:bg-primary/5 gap-2"
+                  >
                     <Plus size={18} />
                     Ajouter une Matière (EC)
                   </Button>
@@ -202,11 +245,8 @@ export default function LMDManagement() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-card border border-border w-full max-w-md rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom-4">
-            <button 
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors"
-            >
-              <X size={20} className="text-foreground" />
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors">
+              <X size={20} />
             </button>
             <div className="mb-6">
               <h3 className="text-2xl font-bold">Nouvelle Classe</h3>
@@ -215,16 +255,83 @@ export default function LMDManagement() {
             <form onSubmit={handleCreateClass} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Nom de la Classe</label>
-                <Input 
-                  placeholder="Ex: Licence 1 Informatique" 
-                  value={newClassName}
-                  onChange={(e) => setNewClassName(e.target.value)}
-                  className="h-12 rounded-xl bg-muted/30"
-                  required
-                />
+                <Input placeholder="Ex: Licence 1 Informatique" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} className="h-12 rounded-xl bg-muted/30" required />
               </div>
               <Button type="submit" disabled={isCreating} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20">
                 {isCreating ? 'Création...' : 'Créer la classe'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Nouvelle UE */}
+      {isUeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card border border-border w-full max-w-md rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom-4">
+            <button onClick={() => setIsUeModalOpen(false)} className="absolute top-4 right-4 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors">
+              <X size={20} />
+            </button>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold">Nouvelle UE</h3>
+              <p className="text-muted-foreground text-sm">Créez une Unité d'Enseignement.</p>
+            </div>
+            <form onSubmit={handleCreateUe} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Nom de l'UE</label>
+                <Input placeholder="Ex: Mathématiques Appliquées" value={ueFormData.name} onChange={(e) => setUeFormData({...ueFormData, name: e.target.value})} className="h-12 rounded-xl bg-muted/30" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Code (ex: UE-MATH)</label>
+                <Input placeholder="Ex: UE-MATH" value={ueFormData.code} onChange={(e) => setUeFormData({...ueFormData, code: e.target.value})} className="h-12 rounded-xl bg-muted/30" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Classe associée</label>
+                <select className="w-full h-12 px-4 bg-muted/30 border border-input rounded-xl appearance-none font-bold text-sm" value={ueFormData.departmentId} onChange={(e) => setUeFormData({...ueFormData, departmentId: e.target.value})} required>
+                  <option value="">Sélectionner une classe</option>
+                  {departments.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </div>
+              <Button type="submit" disabled={isCreatingUe} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20">
+                {isCreatingUe ? 'Création...' : 'Créer l\'UE'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Nouvelle Matière */}
+      {isSubjectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card border border-border w-full max-w-md rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom-4">
+            <button onClick={() => setIsSubjectModalOpen(false)} className="absolute top-4 right-4 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors">
+              <X size={20} />
+            </button>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold">Nouvelle Matière (EC)</h3>
+              <p className="text-muted-foreground text-sm">Ajoutez une matière à l'UE.</p>
+            </div>
+            <form onSubmit={handleCreateSubject} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Nom</label>
+                <Input placeholder="Ex: Algèbre Linéaire" value={subjectFormData.name} onChange={(e) => setSubjectFormData({...subjectFormData, name: e.target.value})} className="h-12 rounded-xl bg-muted/30" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Code</label>
+                <Input placeholder="Ex: ALG101" value={subjectFormData.code} onChange={(e) => setSubjectFormData({...subjectFormData, code: e.target.value})} className="h-12 rounded-xl bg-muted/30" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Crédits ECTS</label>
+                  <Input type="number" min="0" placeholder="Ex: 4" value={subjectFormData.credits} onChange={(e) => setSubjectFormData({...subjectFormData, credits: e.target.value})} className="h-12 rounded-xl bg-muted/30" required />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Coefficient</label>
+                  <Input type="number" step="0.1" min="0.1" placeholder="Ex: 1.5" value={subjectFormData.coefficient} onChange={(e) => setSubjectFormData({...subjectFormData, coefficient: e.target.value})} className="h-12 rounded-xl bg-muted/30" required />
+                </div>
+              </div>
+              <Button type="submit" disabled={isCreatingSubject} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20">
+                {isCreatingSubject ? 'Création...' : 'Créer la Matière'}
               </Button>
             </form>
           </div>

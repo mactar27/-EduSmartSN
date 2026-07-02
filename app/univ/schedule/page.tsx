@@ -42,6 +42,71 @@ export default function SchedulePage() {
   const [selectedClassId, setSelectedClassId] = useState<string>("")
   const [currentDate, setCurrentDate] = useState(new Date())
 
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const [formData, setFormData] = useState({
+    subject: "",
+    type: "CM",
+    room: "",
+    dayOfWeek: 1,
+    startTime: "08:00",
+    endTime: "10:00"
+  })
+
+  // Fetch classes (departments)
+  const { data: deptData, isLoading: deptsLoading } = useSWR('/api/univ/departments', fetcher)
+  const departments = deptData?.data || []
+
+  // Initialize selectedClassId if empty and departments are loaded
+  if (!selectedClassId && departments.length > 0) {
+    setSelectedClassId(departments[0].id)
+  }
+
+  // Fetch events for the selected class
+  const { data: scheduleData, isLoading: scheduleLoading, mutate } = useSWR(
+    selectedClassId ? `/api/univ/schedule?departmentId=${selectedClassId}` : null,
+    fetcher
+  )
+  const events = scheduleData?.data || []
+
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedClassId) {
+      alert("Veuillez sélectionner une classe d'abord.")
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      const tenantId = departments.find((d: any) => d.id === selectedClassId)?.tenantId || "default-tenant" // fallback not needed as api defaults to active tenant if possible, but schema requires it. Let's fetch tenant from an API or rely on the backend.
+      // Actually, `/api/univ/schedule` `POST` requires `tenantId`. Where do we get it?
+      // Wait, `/api/univ/departments` doesn't return `tenantId`. I will pass `tenantId: "mock"` and let backend fetch active tenant or I should modify the backend.
+      
+      const res = await fetch('/api/univ/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          departmentId: selectedClassId,
+          tenantId: departments[0]?.tenantId || 'dummy' // We'll update the backend to auto-fetch tenant if missing
+        })
+      })
+
+      if (res.ok) {
+        alert("Cours planifié avec succès !")
+        setIsModalOpen(false)
+        mutate() // Rafraîchir
+      } else {
+        const err = await res.json()
+        alert(`Erreur: ${err.error}`)
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   // Calculate current week dates
   const getMonday = (d: Date) => {
     const date = new Date(d)
@@ -285,6 +350,66 @@ export default function SchedulePage() {
           </div>
         </div>
       </Card>
+
+      {/* Modal Nouveau Cours */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card border border-border w-full max-w-lg rounded-3xl shadow-2xl p-8 relative animate-in slide-in-from-bottom-4">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 p-2 bg-muted rounded-full hover:bg-muted-foreground/20 transition-colors"
+            >
+              <Plus size={20} className="rotate-45" />
+            </button>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold">Nouveau Cours</h3>
+              <p className="text-muted-foreground text-sm mt-1">Planifiez un événement dans l'emploi du temps.</p>
+            </div>
+            <form onSubmit={handleCreateEvent} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Matière</label>
+                  <input placeholder="Ex: Informatique, Mathématiques..." value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full h-12 px-4 rounded-xl bg-muted/30 border border-input" required />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Type</label>
+                  <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full h-12 px-4 rounded-xl bg-muted/30 border border-input appearance-none" required>
+                    <option value="CM">Cours Magistral (CM)</option>
+                    <option value="TD">Travaux Dirigés (TD)</option>
+                    <option value="TP">Travaux Pratiques (TP)</option>
+                    <option value="EXAM">Examen</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Salle</label>
+                  <input placeholder="Ex: Amphi A, Salle 101" value={formData.room} onChange={e => setFormData({...formData, room: e.target.value})} className="w-full h-12 px-4 rounded-xl bg-muted/30 border border-input" required />
+                </div>
+
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Jour</label>
+                  <select value={formData.dayOfWeek} onChange={e => setFormData({...formData, dayOfWeek: parseInt(e.target.value)})} className="w-full h-12 px-4 rounded-xl bg-muted/30 border border-input appearance-none" required>
+                    {DAYS.map((day, idx) => <option key={idx} value={idx + 1}>{day}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Heure Début</label>
+                  <input type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full h-12 px-4 rounded-xl bg-muted/30 border border-input" required />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Heure Fin</label>
+                  <input type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full h-12 px-4 rounded-xl bg-muted/30 border border-input" required />
+                </div>
+              </div>
+              
+              <Button type="submit" disabled={isCreating} className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg shadow-lg shadow-primary/20 gap-2 mt-4">
+                {isCreating ? 'Planification...' : 'Planifier le cours'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

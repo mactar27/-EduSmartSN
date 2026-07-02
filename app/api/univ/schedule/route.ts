@@ -40,7 +40,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { subject, type, room, professorId, departmentId, tenantId, dayOfWeek, startTime, endTime } = body;
+    let { subject, type, room, professorId, departmentId, tenantId, dayOfWeek, startTime, endTime } = body;
+
+    if (!tenantId || tenantId === 'dummy') {
+      const tenant = await prisma.tenant.findFirst({
+        where: { status: 'ACTIVE' },
+        orderBy: { createdAt: 'asc' }
+      });
+      if (tenant) {
+        tenantId = tenant.id;
+      }
+    }
 
     if (!subject || !room || !departmentId || !tenantId || dayOfWeek === undefined || !startTime || !endTime) {
       return NextResponse.json({ error: 'Données incomplètes' }, { status: 400 });
