@@ -1,30 +1,34 @@
 version: '3.8'
 
 services:
-  db:
+  postgres:
     image: postgres:15-alpine
+    container_name: edusmart_db_prod
     restart: always
     environment:
-      POSTGRES_USER: edusmart
-      POSTGRES_PASSWORD: edusmart_password
-      POSTGRES_DB: edusmart_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: edusmart_prod
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_prod_data:/var/lib/postgresql/data # Les données réelles sont stockées ici de manière permanente
 
-  web:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: edusmart_app_prod
     restart: always
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://edusmart:edusmart_password@db:5432/edusmart_db?schema=public
-      - NODE_ENV=production
+      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/edusmart_prod?schema=public"
+      JWT_SECRET: ${JWT_SECRET}
+      PAYTECH_SECRET_KEY: ${PAYTECH_SECRET_KEY}
+      PAYTECH_API_KEY: ${PAYTECH_API_KEY}
     depends_on:
-      - db
+      - postgres
 
 volumes:
-  pgdata:
+  postgres_prod_data: # Volume persistant

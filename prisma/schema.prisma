@@ -72,6 +72,7 @@ model Tenant {
   students       Student[]
   fees           Fee[]
   scheduleEvents ScheduleEvent[]
+  grades         Grade[]
 }
 
 model User {
@@ -210,12 +211,18 @@ model Grade {
   value       Float
   sessionType SessionType @default(NORMALE)
   semester    Int         @default(1)
-  studentId   String
-  student     Student     @relation(fields: [studentId], references: [id])
-  subjectId   String
-  subject     Subject     @relation(fields: [subjectId], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Fee {

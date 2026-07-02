@@ -3,6 +3,17 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
+    const userRole = request.headers.get('x-user-role');
+    const userTenantId = request.headers.get('x-tenant-id');
+
+    if (!userRole || !userTenantId) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    if (userRole !== "PROFESSOR" && userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Accès interdit" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { subjectId, grades } = body;
 
@@ -10,18 +21,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Données invalides' }, { status: 400 });
     }
 
+    // Sécurité : On force le tenantId de l'utilisateur connecté
     const results = [];
     for (const grade of grades) {
       const { studentId, value } = grade;
       const existing = await prisma.grade.findFirst({
-        where: { studentId, subjectId }
+        where: { studentId, subjectId, tenantId: userTenantId }
       });
       
       if (existing) {
         const updated = await prisma.grade.update({ where: { id: existing.id }, data: { value } });
         results.push(updated);
       } else {
-        const created = await prisma.grade.create({ data: { studentId, subjectId, value } });
+        const created = await prisma.grade.create({ data: { studentId, subjectId, value, tenantId: userTenantId } });
         results.push(created);
       }
     }
