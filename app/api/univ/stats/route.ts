@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         by: ['method'],
         where: { 
           tenantId: targetTenantId,
-          status: 'PAID'
+          status: 'SUCCESS'
         },
         _sum: {
           amount: true

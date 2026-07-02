@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
       await prisma.payment.updateMany({
         where: { 
-          transactionId, 
+          reference: transactionId, 
           status: 'PENDING' 
         },
         data: {

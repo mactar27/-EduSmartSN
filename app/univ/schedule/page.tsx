@@ -139,21 +139,7 @@ export default function SchedulePage() {
     setCurrentDate(d)
   }
 
-  // Fetch classes (departments)
-  const { data: deptData, isLoading: deptsLoading } = useSWR('/api/univ/departments', fetcher)
-  const departments = deptData?.data || []
 
-  // Initialize selectedClassId if empty and departments are loaded
-  if (!selectedClassId && departments.length > 0) {
-    setSelectedClassId(departments[0].id)
-  }
-
-  // Fetch events for the selected class
-  const { data: scheduleData, isLoading: scheduleLoading } = useSWR(
-    selectedClassId ? `/api/univ/schedule?departmentId=${selectedClassId}` : null,
-    fetcher
-  )
-  const events = scheduleData?.data || []
 
   // Function to calculate top and height based on time strings like "08:30"
   const getEventPosition = (start: string, end: string) => {

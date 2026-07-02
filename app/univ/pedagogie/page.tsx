@@ -18,6 +18,9 @@ export default function LMDManagement() {
   const [isCreatingSubject, setIsCreatingSubject] = useState(false)
   const [ueFormData, setUeFormData] = useState({ name: "", code: "", departmentId: "" })
   const [subjectFormData, setSubjectFormData] = useState({ name: "", code: "", credits: "", coefficient: "1.0", ueId: "" })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [newClassName, setNewClassName] = useState("")
+  const [isCreating, setIsCreating] = useState(false)
 
   const { data: deptsData, mutate: mutateDepts } = useSWR('/api/univ/departments', fetcher)
   const departments = deptsData?.data || []

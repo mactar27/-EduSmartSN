@@ -43,7 +43,6 @@ async function main() {
       departments: {
         create: {
           name: 'Informatique',
-          tenantId: tenant.id,
         }
       }
     },
@@ -57,19 +56,17 @@ async function main() {
 
   // 4. Create an academic year
   const currentYear = new Date().getFullYear();
-  const academicYear = await prisma.academicYear.upsert({
-    where: { year: `${currentYear}-${currentYear + 1}` },
-    update: {},
-    create: {
-      year: `${currentYear}-${currentYear + 1}`,
-      startDate: new Date(`${currentYear}-09-01`),
-      endDate: new Date(`${currentYear + 1}-07-31`),
-      isCurrent: true,
+  const academicYear = await prisma.academicYear.create({
+    data: {
+      name: `${currentYear}-${currentYear + 1}`,
+      start: new Date(`${currentYear}-09-01`),
+      end: new Date(`${currentYear + 1}-07-31`),
+      current: true,
       tenantId: tenant.id,
     },
   });
 
-  console.log(`✅ Academic Year created: ${academicYear.year}`);
+  console.log(`✅ Academic Year created: ${academicYear.name}`);
 
   console.log('🎉 Seed finished!');
 }

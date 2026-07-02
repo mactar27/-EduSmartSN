@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         amount: parseFloat(montant),
         method: methode,
         status: 'PENDING',
-        transactionId
+        reference: transactionId
       }
     });
 

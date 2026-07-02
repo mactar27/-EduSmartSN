@@ -41,7 +41,7 @@ export async function POST(
         where: { id: existingUser.id },
         data: {
           tenantId: etablissementId,
-          role: 'ADMIN' // Adjusting to the Prisma UserRole enum
+          role: 'UNIV_ADMIN' // Adjusting to the Prisma UserRole enum
         }
       });
     } else {
@@ -51,7 +51,7 @@ export async function POST(
           email: demo.email,
           password: tempPassword,
           name: demo.contactName,
-          role: 'ADMIN',
+          role: 'UNIV_ADMIN',
           tenantId: etablissementId
         }
       });
