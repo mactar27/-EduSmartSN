@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import useSWR from "swr"
 import { 
   TrendingUp, 
   Users, 
@@ -20,8 +21,34 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export default function RecoveryDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const { data: paymentsData, isLoading: paymentsLoading } = useSWR('/api/paiements', fetcher)
+  const { data: statsData, isLoading: statsLoading } = useSWR('/api/stats', fetcher)
+
+  const payments = paymentsData?.data || []
+  const totalEncaissé = statsData?.paiements_mois || 0
+  
+  // Calculate total from all complete payments in fetched data just in case
+  const totalSum = payments.reduce((acc: number, p: any) => acc + (p.statut === 'complete' ? Number(p.montant) : 0), 0)
+  const displayTotal = totalEncaissé > 0 ? totalEncaissé : totalSum
+
+  const filteredPayments = payments.filter((p: any) => 
+    p.etudiant_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.reference?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr)
+    return {
+      date: d.toLocaleDateString('fr-FR'),
+      time: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    }
+  }
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -52,8 +79,10 @@ export default function RecoveryDashboard() {
             </div>
             <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full">+12.5%</span>
           </div>
-          <p className="text-sm font-medium text-muted-foreground">Total Encaissé (Mai)</p>
-          <h3 className="text-3xl font-black mt-1">8 450 000 <span className="text-sm font-bold opacity-50">FCFA</span></h3>
+          <p className="text-sm font-medium text-muted-foreground">Total Encaissé (Mois)</p>
+          <h3 className="text-3xl font-black mt-1">
+            {new Intl.NumberFormat('fr-FR').format(displayTotal)} <span className="text-sm font-bold opacity-50">FCFA</span>
+          </h3>
         </Card>
 
         <Card className="p-6 border-border rounded-[2rem] bg-card hover:shadow-xl transition-all group">
@@ -133,7 +162,7 @@ export default function RecoveryDashboard() {
                </div>
 
                <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-muted-foreground pt-2">
-                  <span>Mensualité Mai</span>
+                  <span>Mensualité Mois en cours</span>
                   <span className="text-foreground">62%</span>
                </div>
                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
@@ -177,7 +206,12 @@ export default function RecoveryDashboard() {
             <div className="p-8 border-b border-border flex flex-col md:flex-row justify-between gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <Input placeholder="Rechercher un élève ou une transaction..." className="pl-12 h-12 bg-muted/20 border-none rounded-2xl" />
+                <Input 
+                  placeholder="Rechercher un élève ou une transaction..." 
+                  className="pl-12 h-12 bg-muted/20 border-none rounded-2xl"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
               <Button variant="outline" className="h-12 rounded-2xl border-border gap-2">
                 <Filter size={18} /> Filtres
@@ -191,36 +225,59 @@ export default function RecoveryDashboard() {
                     <tr className="text-left text-[10px] text-muted-foreground uppercase tracking-[0.2em] bg-muted/10">
                       <th className="px-8 py-4 font-black">Date & Heure</th>
                       <th className="px-8 py-4 font-black">Élève</th>
-                      <th className="px-8 py-4 font-black">Type</th>
+                      <th className="px-8 py-4 font-black">Statut</th>
                       <th className="px-8 py-4 font-black">Montant</th>
                       <th className="px-8 py-4 font-black">Méthode</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {[1,2,3,4,5].map((i) => (
-                      <tr key={i} className="hover:bg-muted/30 transition-colors group">
-                        <td className="px-8 py-5">
-                          <p className="text-xs font-bold">Aujourd'hui</p>
-                          <p className="text-[10px] text-muted-foreground">14:2{i}</p>
-                        </td>
-                        <td className="px-8 py-5">
-                          <p className="font-bold text-sm">Amadou Sall</p>
-                          <p className="text-[10px] text-muted-foreground">L1 Informatique</p>
-                        </td>
-                        <td className="px-8 py-5">
-                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded">MENSUALITÉ</span>
-                        </td>
-                        <td className="px-8 py-5 font-black text-primary">+15 000</td>
-                        <td className="px-8 py-5">
-                           <div className="flex items-center gap-2">
-                             <div className="w-6 h-6 rounded-full bg-[#00AEEF] flex items-center justify-center p-1">
-                               <img src="/wave.png" alt="Wave" />
-                             </div>
-                             <span className="text-xs font-bold uppercase">Wave</span>
-                           </div>
+                    {paymentsLoading ? (
+                      <tr>
+                        <td colSpan={5} className="px-8 py-8 text-center text-muted-foreground">
+                          Chargement des paiements...
                         </td>
                       </tr>
-                    ))}
+                    ) : filteredPayments.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-8 py-8 text-center text-muted-foreground">
+                          Aucun paiement récent
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredPayments.map((p: any) => {
+                        const { date, time } = formatDate(p.createdAt || p.created_at)
+                        return (
+                          <tr key={p.id} className="hover:bg-muted/30 transition-colors group">
+                            <td className="px-8 py-5">
+                              <p className="text-xs font-bold">{date}</p>
+                              <p className="text-[10px] text-muted-foreground">{time}</p>
+                            </td>
+                            <td className="px-8 py-5">
+                              <p className="font-bold text-sm">{p.etudiant_name}</p>
+                              <p className="text-[10px] text-muted-foreground">{p.matricule || 'N/A'}</p>
+                            </td>
+                            <td className="px-8 py-5">
+                              {p.statut === 'complete' ? (
+                                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded">REÇU</span>
+                              ) : (
+                                <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-1 rounded uppercase">{p.statut || 'PENDING'}</span>
+                              )}
+                            </td>
+                            <td className="px-8 py-5 font-black text-primary">+{new Intl.NumberFormat('fr-FR').format(p.montant || 0)}</td>
+                            <td className="px-8 py-5">
+                              <div className="flex items-center gap-2">
+                                {p.methode?.toLowerCase().includes('wave') && (
+                                  <div className="w-6 h-6 rounded-full bg-[#00AEEF] flex items-center justify-center p-1">
+                                    <img src="/wave.png" alt="Wave" />
+                                  </div>
+                                )}
+                                <span className="text-xs font-bold uppercase">{p.methode || 'N/A'}</span>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
                   </tbody>
                 </table>
               ) : (
@@ -235,6 +292,7 @@ export default function RecoveryDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
+                    {/* Impayés - Keep this mock for now until we have an impayés route */}
                     {[1,2,3].map((i) => (
                       <tr key={i} className="hover:bg-rose-50/30 transition-colors">
                         <td className="px-8 py-5 font-bold text-sm">Abdoulaye Diop</td>
@@ -264,3 +322,4 @@ export default function RecoveryDashboard() {
     </div>
   )
 }
+
